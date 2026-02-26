@@ -2,13 +2,11 @@
 
 class Home extends Controller {
 
-    public function index() {
+   public function index() {
 
-        $db = new Database();                // create DB object
-        $db->query("SELECT NOW() as time");  // simple query
-        $result = $db->single();             // fetch single row
+    $productModel = $this->model('Product');
+    $products = $productModel->getAllProducts();
 
-        $this->view('home', ['time' => $result->time]);
-    }
-
+    $this->view('home', ['products' => $products]);
 }
+} 
