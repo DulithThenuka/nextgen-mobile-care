@@ -13,16 +13,10 @@
 <?php require_once 'partials/header.php'; ?>
 
 <section class="text-center py-32">
-    <h1 class="text-5xl font-bold mb-6">
-        Premium Device Care.
-    </h1>
-    <h2 class="text-3xl text-blue-500 mb-6">
-        Next Generation Service.
-    </h2>
-
+    <h1 class="text-5xl font-bold mb-6">Premium Device Care.</h1>
+    <h2 class="text-3xl text-blue-500 mb-6">Next Generation Service.</h2>
     <p class="text-gray-400 max-w-xl mx-auto">
-        Professional mobile repair and premium electronics sales.
-        Fast. Reliable. Trusted.
+        Professional mobile repair and premium electronics sales. Fast. Reliable. Trusted.
     </p>
 
     <div class="mt-10">
@@ -30,6 +24,12 @@
             Explore Products
         </a>
     </div>
+
+    <!-- SERVER TIME TEST -->
+    <p class="mt-10 text-gray-500">
+        Server Time: <?php echo $data['time']; ?>
+    </p>
+
 </section>
 
 <?php require_once 'partials/footer.php'; ?>
