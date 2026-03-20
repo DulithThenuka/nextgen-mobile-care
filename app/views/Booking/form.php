@@ -12,8 +12,14 @@
         <div class="bg-gray-900 rounded-2xl shadow-xl p-8 border border-gray-800">
             <?php if(isset($data['success'])): ?>
                 <div class="bg-green-600 text-white px-4 py-3 rounded mb-6">
-                    <?php echo $data['success']; ?>
-                </div>
+                     <?php echo $data['success']; ?>
+                    </div>
+
+                    <a href="https://wa.me/94771234567?text=I%20just%20booked%20a%20repair%20service" 
+                 target="_blank"
+                class="block text-center bg-green-500 hover:bg-green-600 px-6 py-3 rounded-lg font-semibold">
+                        Confirm via WhatsApp
+                    </a>
             <?php endif; ?>
 
             <?php if(isset($data['error'])): ?>
