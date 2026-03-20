@@ -7,6 +7,11 @@ class Home extends Controller {
     $productModel = $this->model('Product');
     $products = $productModel->getAllProducts();
 
+    if(!$products) {
+        $products = [];
+    }
+
     $this->view('home', ['products' => $products]);
 }
-} 
+}
+ 

@@ -1,13 +1,12 @@
 <?php
 
-class Admin {
+class AdminModel {
     private $db;
 
     public function __construct() {
         $this->db = new Database();
     }
 
-    // Check login credentials
     public function login($username, $password) {
         $this->db->query("SELECT * FROM admins WHERE username = :username");
         $this->db->bind(':username', $username);

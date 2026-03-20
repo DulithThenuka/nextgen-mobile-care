@@ -15,7 +15,7 @@
     <div class="space-x-6">
         <a href="/nextgen-mobile-care/public/" class="hover:text-blue-400">Home</a>
         <a href="#" class="hover:text-blue-400">Products</a>
-        <a href="#" class="hover:text-blue-400">Repair Booking</a>
+        <a href="/nextgen-mobile-care/public/booking" class="hover:text-blue-400">Repair Booking</a>
         <a href="#" class="hover:text-blue-400">Contact</a>
     </div>
 </nav>
