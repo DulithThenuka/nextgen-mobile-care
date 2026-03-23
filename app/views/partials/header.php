@@ -1,28 +1,115 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NextGen Mobile Care</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title><?php echo SITENAME; ?></title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #0b0b0f;
+            color: #fff;
+        }
+
+        a {
+            text-decoration: none;
+        }
+
+        .site-navbar {
+            width: 100%;
+            background: rgba(11, 11, 15, 0.95);
+            border-bottom: 1px solid #222230;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: auto;
+            padding: 16px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .brand a {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #fff;
+            letter-spacing: 0.5px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .nav-links a {
+            color: #d5d5df;
+            font-size: 0.95rem;
+            transition: 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: #fff;
+        }
+
+        .nav-btn {
+            background: #fff;
+            color: #111 !important;
+            padding: 10px 18px;
+            border-radius: 10px;
+            font-weight: 600;
+        }
+
+        .nav-btn:hover {
+            background: #dcdcdc;
+        }
+
+        .page-container {
+            min-height: calc(100vh - 140px);
+        }
+
+        @media (max-width: 768px) {
+            .nav-container {
+                flex-direction: column;
+                gap: 12px;
+            }
+
+            .nav-links {
+                justify-content: center;
+            }
+        }
+    </style>
 </head>
-<body class="bg-black text-white">
+<body>
 
-<nav class="sticky top-0 z-50 bg-black/80 backdrop-blur border-b border-gray-800">
-    <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-        <a href="/nextgen-mobile-care/public/" class="text-2xl font-bold tracking-wide text-white">
-            NextGen <span class="text-blue-500">Mobile Care</span>
-        </a>
-
-        <div class="hidden md:flex items-center space-x-8 text-sm font-medium">
-            <a href="/nextgen-mobile-care/public/" class="hover:text-blue-400 transition">Home</a>
-            <a href="/nextgen-mobile-care/public/" class="hover:text-blue-400 transition">Products</a>
-            <a href="/nextgen-mobile-care/public/booking" class="hover:text-blue-400 transition">Repair Booking</a>
-            <a href="/nextgen-mobile-care/public/contact" class="hover:text-blue-400 transition">Contact</a>
+<nav class="site-navbar">
+    <div class="nav-container">
+        <div class="brand">
+            <a href="<?php echo URLROOT; ?>/home">NextGen Mobile Care</a>
         </div>
 
-        <a href="/nextgen-mobile-care/public/booking" class="hidden md:inline-block bg-blue-600 hover:bg-blue-700 transition px-5 py-2 rounded-full text-sm font-semibold shadow-lg shadow-blue-600/20">
-            Book Repair
-        </a>
+        <div class="nav-links">
+            <a href="<?php echo URLROOT; ?>/home">Home</a>
+            <a href="<?php echo URLROOT; ?>/products">Products</a>
+            <a href="<?php echo URLROOT; ?>/booking">Bookings</a>
+            <a href="<?php echo URLROOT; ?>/contact">Contact</a>
+            <a href="<?php echo URLROOT; ?>/booking" class="nav-btn">Book Now</a>
+        </div>
     </div>
 </nav>
+
+<div class="page-container">

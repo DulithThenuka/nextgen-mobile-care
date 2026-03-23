@@ -1,7 +1,7 @@
 <?php
 
-class Database {
-
+class Database
+{
     private $host = DB_HOST;
     private $user = DB_USER;
     private $pass = DB_PASS;
@@ -10,8 +10,8 @@ class Database {
     private $dbh;
     private $stmt;
 
-    public function __construct() {
-
+    public function __construct()
+    {
         $dsn = 'mysql:host=' . $this->host . ';dbname=' . $this->dbname . ';charset=utf8mb4';
 
         $options = [
@@ -22,17 +22,19 @@ class Database {
         try {
             $this->dbh = new PDO($dsn, $this->user, $this->pass, $options);
         } catch (PDOException $e) {
-            die("Database Connection Failed: " . $e->getMessage());
+            die('Database Connection Failed: ' . $e->getMessage());
         }
     }
 
-    public function query($sql) {
+    public function query($sql)
+    {
         $this->stmt = $this->dbh->prepare($sql);
     }
 
-    public function bind($param, $value, $type = null) {
-        if(is_null($type)) {
-            switch(true) {
+    public function bind($param, $value, $type = null)
+    {
+        if (is_null($type)) {
+            switch (true) {
                 case is_int($value):
                     $type = PDO::PARAM_INT;
                     break;
@@ -44,27 +46,32 @@ class Database {
                     break;
                 default:
                     $type = PDO::PARAM_STR;
+                    break;
             }
         }
 
         $this->stmt->bindValue($param, $value, $type);
     }
 
-    public function execute() {
+    public function execute()
+    {
         return $this->stmt->execute();
     }
 
-    public function resultSet() {
+    public function resultSet()
+    {
         $this->execute();
         return $this->stmt->fetchAll();
     }
 
-    public function single() {
+    public function single()
+    {
         $this->execute();
         return $this->stmt->fetch();
     }
 
-    public function rowCount() {
+    public function rowCount()
+    {
         return $this->stmt->rowCount();
     }
 }

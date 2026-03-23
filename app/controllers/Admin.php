@@ -26,15 +26,24 @@ class Admin extends Controller {
         }
     }
 
-    public function dashboard() {
-        if(!isset($_SESSION['admin_id'])) {
-            header('Location: /nextgen-mobile-care/public/admin/login');
-            exit;
-        }
-
-        $this->view('admin/dashboard');
+    public function dashboard()
+{
+    if (!isset($_SESSION['admin_id'])) {
+        header('Location: ' . URLROOT . '/admin/login');
+        exit;
     }
 
+    $productModel = $this->model('Product');
+    $bookingModel = $this->model('Booking');
+
+    $data = [
+        'product_count' => $productModel->getProductCount(),
+        'booking_count' => $bookingModel->getBookingCount(),
+        'recent_bookings' => $bookingModel->getRecentBookings(5)
+    ];
+
+    $this->view('admin/dashboard', $data);
+}
     public function logout() {
         session_unset();
         session_destroy();
@@ -137,4 +146,36 @@ class Admin extends Controller {
 
     $this->view('admin/bookings', ['bookings' => $bookings]);
 }
+public function products()
+{
+    if (!isset($_SESSION['admin_id'])) {
+        header('Location: ' . URLROOT . '/admin/login');
+        exit;
+    }
+
+    $productModel = $this->model('Product');
+    $products = $productModel->getProducts();
+
+    $data = [
+        'products' => $products
+    ];
+
+    $this->view('admin/products', $data);
+}
+
+public function deleteProduct($id)
+{
+    if (!isset($_SESSION['admin_id'])) {
+        header('Location: ' . URLROOT . '/admin/login');
+        exit;
+    }
+
+    $productModel = $this->model('Product');
+
+    if ($productModel->deleteProduct($id)) {
+        header('Location: ' . URLROOT . '/admin/products');
+        exit;
+    } else {
+        die('Failed to delete product');
+    }
 }

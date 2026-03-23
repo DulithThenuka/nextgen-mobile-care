@@ -1,26 +1,23 @@
 <?php
 
-class Home extends Controller {
-
-    public function index() {
+class Home extends Controller
+{
+    public function index()
+    {
         $productModel = $this->model('Product');
-        $products = $productModel->getAllProducts();
 
-        if(!$products) {
-            $products = [];
+        $products = [];
+        if (method_exists($productModel, 'getFeaturedProducts')) {
+            $products = $productModel->getFeaturedProducts();
+        } elseif (method_exists($productModel, 'getProducts')) {
+            $products = $productModel->getProducts();
         }
 
-        $this->view('home', ['products' => $products]);
-    }
+        $data = [
+            'title' => 'NextGen Mobile Care',
+            'products' => $products
+        ];
 
-    public function product($id) {
-        $productModel = $this->model('Product');
-        $product = $productModel->getProductById($id);
-
-        if(!$product) {
-            die('Product not found');
-        }
-
-        $this->view('product_details', ['product' => $product]);
+        $this->view('home/index', $data);
     }
 }

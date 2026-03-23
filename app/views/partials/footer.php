@@ -1,20 +1,14 @@
-<footer class="border-t border-gray-800 bg-black">
-    <div class="max-w-7xl mx-auto px-6 py-10 flex flex-col md:flex-row justify-between items-center gap-4">
-        <div>
-            <h3 class="text-xl font-bold">NextGen <span class="text-blue-500">Mobile Care</span></h3>
-            <p class="text-gray-500 mt-2">Premium Device Care. Next Generation Service.</p>
-        </div>
+</div>
 
-        <p class="text-gray-500 text-sm">
-            © <?php echo date('Y'); ?> NextGen Mobile Care. All rights reserved.
+<footer style="background:#111118; border-top:1px solid #222230; padding:30px 20px; text-align:center; color:#bdbdcc;">
+    <div style="max-width:1200px; margin:auto;">
+        <h3 style="color:#fff; margin-bottom:10px;">NextGen Mobile Care</h3>
+        <p style="margin-bottom:8px;">Premium Mobile Repair & Care</p>
+        <p style="margin-bottom:8px;">Phone Repairs | Mobile Accessories | Booking Service</p>
+        <p style="font-size:0.9rem; color:#8f8fa3;">
+            &copy; <?php echo date('Y'); ?> NextGen Mobile Care. All rights reserved.
         </p>
     </div>
-
-    <a href="https://wa.me/94YOURNUMBER" 
-       target="_blank"
-       class="fixed bottom-6 right-6 bg-green-500 hover:bg-green-600 transition text-white px-5 py-3 rounded-full shadow-lg z-50">
-       WhatsApp
-    </a>
 </footer>
 
 </body>

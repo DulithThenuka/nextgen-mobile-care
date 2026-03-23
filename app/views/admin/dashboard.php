@@ -1,73 +1,149 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard - NextGen Mobile Care</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-</head>
+<?php require APPROOT . '/views/partials/header.php'; ?>
 
-<body class="bg-gray-900 text-white">
+<style>
+    .admin-dashboard {
+        max-width: 1200px;
+        margin: 50px auto;
+        padding: 20px;
+    }
 
-<!-- Navbar -->
-<nav class="bg-gray-800 px-6 py-4 flex justify-between items-center">
-    <h1 class="text-xl font-bold text-blue-500">
-        NextGen Mobile Care - Admin
-    </h1>
+    .admin-dashboard h1 {
+        margin-bottom: 25px;
+    }
 
-    <div>
-        <span class="mr-4 text-gray-300">
-            Welcome, <?php echo $_SESSION['admin_username']; ?>
-        </span>
-        <a href="/nextgen-mobile-care/public/admin/logout" 
-           class="bg-red-600 px-4 py-2 rounded hover:bg-red-700 transition">
-           Logout
-        </a>
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 20px;
+        margin-bottom: 35px;
+    }
+
+    .stat-card {
+        background: #15151d;
+        border: 1px solid #242433;
+        border-radius: 18px;
+        padding: 25px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    }
+
+    .stat-card h3 {
+        color: #bdbdcc;
+        margin-bottom: 10px;
+        font-size: 1rem;
+    }
+
+    .stat-card .stat-number {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #fff;
+    }
+
+    .recent-box {
+        background: #15151d;
+        border: 1px solid #242433;
+        border-radius: 18px;
+        padding: 25px;
+    }
+
+    .recent-box h2 {
+        margin-bottom: 20px;
+    }
+
+    .table-wrap {
+        overflow-x: auto;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        color: #fff;
+    }
+
+    table th, table td {
+        padding: 12px;
+        border-bottom: 1px solid #2a2a3a;
+        text-align: left;
+    }
+
+    .admin-actions {
+        margin-top: 30px;
+        display: flex;
+        gap: 15px;
+        flex-wrap: wrap;
+    }
+
+    .admin-btn {
+        display: inline-block;
+        padding: 12px 18px;
+        border-radius: 10px;
+        background: #fff;
+        color: #111;
+        font-weight: 600;
+    }
+
+    .admin-btn.secondary {
+        background: transparent;
+        color: #fff;
+        border: 1px solid #3a3a50;
+    }
+</style>
+
+<div class="admin-dashboard">
+    <h1>Admin Dashboard</h1>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <h3>Total Products</h3>
+            <div class="stat-number"><?php echo $data['product_count']; ?></div>
+        </div>
+
+        <div class="stat-card">
+            <h3>Total Bookings</h3>
+            <div class="stat-number"><?php echo $data['booking_count']; ?></div>
+        </div>
     </div>
-</nav>
 
-<!-- Main Content -->
-<div class="p-10">
+    <div class="recent-box">
+        <h2>Recent Bookings</h2>
 
-    <h2 class="text-3xl font-bold mb-8">Dashboard</h2>
-
-    <!-- Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-
-        <!-- Products Card -->
-        <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
-            <h3 class="text-xl font-semibold mb-4">Products</h3>
-            <p class="text-gray-400 mb-6">Manage all products in your store.</p>
-            <a href="/nextgen-mobile-care/public/admin/products" 
-               class="bg-blue-600 px-4 py-2 rounded hover:bg-blue-700 transition">
-               Manage Products
-            </a>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Customer</th>
+                        <th>Device</th>
+                        <th>Service</th>
+                        <th>Date</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php if (!empty($data['recent_bookings'])) : ?>
+                        <?php foreach ($data['recent_bookings'] as $booking) : ?>
+                            <tr>
+                                <td><?php echo $booking->id; ?></td>
+                                <td><?php echo htmlspecialchars($booking->customer_name); ?></td>
+                                <td><?php echo htmlspecialchars($booking->device_model); ?></td>
+                                <td><?php echo htmlspecialchars($booking->service_type); ?></td>
+                                <td><?php echo htmlspecialchars($booking->booking_date); ?></td>
+                                <td><?php echo htmlspecialchars($booking->status); ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php else : ?>
+                        <tr>
+                            <td colspan="6">No recent bookings found.</td>
+                        </tr>
+                    <?php endif; ?>
+                </tbody>
+            </table>
         </div>
 
-        <!-- Orders Card (future) -->
-        <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
-            <h3 class="text-xl font-semibold mb-4">Orders</h3>
-            <p class="text-gray-400 mb-6">View and manage customer orders.</p>
-            <button class="bg-gray-600 px-4 py-2 rounded cursor-not-allowed">
-                Coming Soon
-            </button>
+        <div class="admin-actions">
+            <a href="<?php echo URLROOT; ?>/booking/admin" class="admin-btn">Manage Bookings</a>
+            <a href="<?php echo URLROOT; ?>/products" class="admin-btn secondary">View Products</a>
         </div>
-
-        <!-- Repair Bookings Card -->
-        <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
-            <h3 class="text-xl font-semibold mb-4">Repair Bookings</h3>
-            <p class="text-gray-400 mb-6">Manage repair service requests.</p>
-            <button class="bg-gray-600 px-4 py-2 rounded cursor-not-allowed">
-                <a href="/nextgen-mobile-care/public/admin/bookings" 
-                    class="bg-blue-600 px-4 py-2 rounded hover:bg-blue-700 transition">
-                        View Bookings
-                </a>
-            </button>
-        </div>
-
     </div>
-
 </div>
 
-</body>
-</html>
+<?php require APPROOT . '/views/partials/footer.php'; ?>

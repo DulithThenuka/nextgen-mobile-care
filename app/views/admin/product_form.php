@@ -34,7 +34,7 @@
                 <?php echo isset($data['product']) ? 'Edit Product' : 'Add Product'; ?>
             </h2>
 
-            <form method="POST" enctype="multipart/form-data" class="space-y-5">
+            <form action="..." method="POST" enctype="multipart/form-data">
                 <div>
                     <label class="block mb-2 text-sm text-gray-300">Product Name</label>
                     <input
@@ -44,6 +44,10 @@
                         class="w-full px-4 py-2 rounded bg-gray-700 text-white"
                         required
                     >
+                </div>
+                <div class="form-group">
+                        <label>Product Image</label>
+                        <input type="file" name="image">
                 </div>
 
                 <div>

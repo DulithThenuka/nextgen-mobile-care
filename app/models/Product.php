@@ -20,12 +20,12 @@ class Product {
     }
 
     public function addProduct($name, $description, $price, $image) {
-        $this->db->query("INSERT INTO products (name, description, price, image) VALUES (:name, :description, :price, :image)");
-        $this->db->bind(':name', $name);
-        $this->db->bind(':description', $description);
-        $this->db->bind(':price', $price);
-        $this->db->bind(':image', $image);
-
+        $this->db->query('INSERT INTO products (name, price, description, image) 
+                  VALUES (:name, :price, :description, :image)');
+$this->db->bind(':name', $data['name']);
+$this->db->bind(':price', $data['price']);
+$this->db->bind(':description', $data['description']);
+$this->db->bind(':image', $data['image']);
         return $this->db->execute();
     }
 
@@ -46,4 +46,18 @@ class Product {
 
         return $this->db->execute();
     }
+    public function getFeaturedProducts(){
+    $this->db->query('SELECT * FROM products ORDER BY id DESC LIMIT 4');
+    return $this->db->resultSet();
+    }
+    public function getProducts(){
+    $this->db->query("SELECT * FROM products ORDER BY id DESC");
+    return $this->db->resultSet();
+}public function getProductCount()
+{
+    $this->db->query("SELECT COUNT(*) as total FROM products");
+    $row = $this->db->single();
+    return $row->total;
+}
+
 }
