@@ -9,7 +9,7 @@
 
     .products-title {
         text-align: center;
-        margin-bottom: 40px;
+        margin-bottom: 30px;
     }
 
     .products-title h1 {
@@ -19,6 +19,41 @@
 
     .products-title p {
         color: #bbb;
+    }
+
+    .filter-bar {
+        background: #15151d;
+        border: 1px solid #242433;
+        border-radius: 16px;
+        padding: 20px;
+        margin-bottom: 30px;
+    }
+
+    .filter-form {
+        display: grid;
+        grid-template-columns: 1fr 220px 220px 140px;
+        gap: 15px;
+    }
+
+    .filter-input,
+    .filter-select {
+        width: 100%;
+        padding: 12px 14px;
+        border-radius: 10px;
+        border: 1px solid #33334a;
+        background: #0f0f15;
+        color: #fff;
+        outline: none;
+    }
+
+    .filter-btn {
+        border: none;
+        border-radius: 10px;
+        background: #fff;
+        color: #111;
+        font-weight: 700;
+        cursor: pointer;
+        padding: 12px 16px;
     }
 
     .products-grid {
@@ -33,10 +68,6 @@
         border-radius: 16px;
         padding: 20px;
         transition: 0.3s ease;
-    }
-
-    .product-card:hover {
-        transform: translateY(-5px);
     }
 
     .product-card img {
@@ -59,7 +90,13 @@
 
     .price {
         font-weight: bold;
-        margin-bottom: 10px;
+        margin-bottom: 8px;
+    }
+
+    .meta {
+        font-size: 0.9rem;
+        color: #bdbdcc;
+        margin-bottom: 12px;
     }
 
     .btn-buy {
@@ -71,40 +108,85 @@
         font-weight: 600;
     }
 
-    .btn-buy:hover {
-        background: #ddd;
+    .out-of-stock-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: #7a1f1f;
+    color: #fff;
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+
+    @media (max-width: 768px) {
+        .filter-form {
+            grid-template-columns: 1fr;
+        }
     }
 </style>
 
 <div class="products-page">
-
     <div class="products-title">
         <h1>Our Products</h1>
         <p>Explore our available mobile devices and accessories</p>
     </div>
 
-    <div class="products-grid">
+    <div class="filter-bar">
+        <form action="<?php echo URLROOT; ?>/products" method="GET" class="filter-form">
+            <input
+                type="text"
+                name="search"
+                class="filter-input"
+                placeholder="Search by product name..."
+                value="<?php echo htmlspecialchars($data['search'] ?? ''); ?>"
+            >
 
-        <?php if (!empty($data['products'])) : ?>
-            <?php foreach ($data['products'] as $product) : ?>
-                <div class="product-card">
-                    <img src="<?php echo URLROOT; ?>/uploads/<?php echo $product->image; ?>" alt="Product">
+            <select name="category" class="filter-select">
+                <option value="">All Categories</option>
+                <option value="Phones" <?php echo (($data['category'] ?? '') === 'Phones') ? 'selected' : ''; ?>>Phones</option>
+                <option value="Accessories" <?php echo (($data['category'] ?? '') === 'Accessories') ? 'selected' : ''; ?>>Accessories</option>
+                <option value="Tablets" <?php echo (($data['category'] ?? '') === 'Tablets') ? 'selected' : ''; ?>>Tablets</option>
+                <option value="Smart Watches" <?php echo (($data['category'] ?? '') === 'Smart Watches') ? 'selected' : ''; ?>>Smart Watches</option>
+            </select>
 
-                    <h3><?php echo htmlspecialchars($product->name); ?></h3>
+            <select name="sort" class="filter-select">
+                <option value="">Sort By</option>
+                <option value="price_asc" <?php echo (($data['sort'] ?? '') === 'price_asc') ? 'selected' : ''; ?>>Price: Low to High</option>
+                <option value="price_desc" <?php echo (($data['sort'] ?? '') === 'price_desc') ? 'selected' : ''; ?>>Price: High to Low</option>
+            </select>
 
-                    <p><?php echo htmlspecialchars($product->description); ?></p>
-
-                    <div class="price">LKR <?php echo number_format($product->price, 2); ?></div>
-
-                    <a href="<?php echo URLROOT; ?>/products/show/<?php echo $product->id; ?>" class="btn-buy">View</a>
-                </div>
-            <?php endforeach; ?>
-        <?php else : ?>
-            <p>No products available.</p>
-        <?php endif; ?>
-
+            <button type="submit" class="filter-btn">Apply</button>
+        </form>
     </div>
 
+    <div class="products-grid">
+        <?php if (!empty($data['products'])) : ?>
+            <?php foreach ($data['products'] as $product) : ?>
+    <div class="product-card">
+        <img src="<?php echo !empty($product->image) ? URLROOT . '/uploads/' . $product->image : 'https://via.placeholder.com/300'; ?>" alt="Product">
+
+        <h3><?php echo htmlspecialchars($product->name); ?></h3>
+        <p><?php echo htmlspecialchars($product->description); ?></p>
+
+        <div class="price">LKR <?php echo number_format($product->price, 2); ?></div>
+
+        <div class="meta">
+            Category: <?php echo htmlspecialchars($product->category); ?><br>
+            Stock:
+            <?php if ((int)$product->stock > 0) : ?>
+                <?php echo (int)$product->stock; ?>
+            <?php else : ?>
+                <span class="out-of-stock-badge">Out of Stock</span>
+            <?php endif; ?>
+        </div>
+
+        <a href="<?php echo URLROOT; ?>/products/show/<?php echo $product->id; ?>" class="btn-buy">View</a>
+    </div>
+<?php endforeach; ?>
+        <?php else : ?>
+            <p>No products found.</p>
+        <?php endif; ?>
+    </div>
 </div>
 
 <?php require APPROOT . '/views/partials/footer.php'; ?>

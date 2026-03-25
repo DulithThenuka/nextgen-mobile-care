@@ -1,177 +1,138 @@
-<?php require APPROOT . '/app/views/inc/header.php'; ?>
+<?php require APPROOT . '/views/partials/header.php'; ?>
 
 <style>
-    .admin-form-page {
-        max-width: 800px;
+    .admin-products-page {
+        max-width: 1200px;
         margin: 50px auto;
         padding: 20px;
     }
 
-    .admin-form-card {
-        background: #15151d;
-        border: 1px solid #242433;
-        border-radius: 18px;
-        padding: 30px;
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
-    }
-
-    .admin-form-card h1 {
-        margin-bottom: 10px;
-    }
-
-    .admin-form-card p {
-        color: #bdbdcc;
+    .admin-products-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 15px;
+        flex-wrap: wrap;
         margin-bottom: 25px;
     }
 
-    .form-group {
-        margin-bottom: 18px;
+    .admin-products-top h1 {
+        margin: 0;
     }
 
-    .form-group label {
-        display: block;
-        margin-bottom: 8px;
+    .btn-add {
+        display: inline-block;
+        padding: 12px 18px;
+        border-radius: 10px;
+        background: #fff;
+        color: #111;
+        font-weight: 700;
+        text-decoration: none;
+    }
+
+    .table-wrap {
+        overflow-x: auto;
+        background: #15151d;
+        border: 1px solid #242433;
+        border-radius: 16px;
+        padding: 20px;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        color: #fff;
+    }
+
+    table th, table td {
+        padding: 12px;
+        border-bottom: 1px solid #2a2a3a;
+        text-align: left;
+        vertical-align: middle;
+    }
+
+    .product-thumb {
+        width: 70px;
+        height: 70px;
+        object-fit: cover;
+        border-radius: 10px;
+        border: 1px solid #2f2f40;
+    }
+
+    .action-links {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .btn-action {
+        display: inline-block;
+        padding: 8px 12px;
+        border-radius: 8px;
+        text-decoration: none;
         font-weight: 600;
     }
 
-    .form-control {
-        width: 100%;
-        padding: 13px 14px;
-        border-radius: 10px;
-        border: 1px solid #33334a;
-        background: #0f0f15;
-        color: #fff;
-        outline: none;
-    }
-
-    textarea.form-control {
-        min-height: 120px;
-        resize: vertical;
-    }
-
-    input[type="file"].form-control {
-        padding: 10px;
-    }
-
-    .text-error {
-        color: #ff7b7b;
-        font-size: 0.9rem;
-        margin-top: 6px;
-    }
-
-    .form-actions {
-        display: flex;
-        gap: 12px;
-        flex-wrap: wrap;
-        margin-top: 20px;
-    }
-
-    .btn-submit,
-    .btn-back {
-        display: inline-block;
-        padding: 12px 20px;
-        border-radius: 10px;
-        font-weight: 700;
-        text-decoration: none;
-        cursor: pointer;
-        border: none;
-    }
-
-    .btn-submit {
+    .btn-edit {
         background: #fff;
         color: #111;
     }
 
-    .btn-submit:hover {
-        background: #ddd;
-    }
-
-    .btn-back {
-        background: transparent;
+    .btn-delete {
+        background: #7a1f1f;
         color: #fff;
-        border: 1px solid #3a3a50;
-    }
-
-    .btn-back:hover {
-        background: #1b1b24;
-    }
-
-    .file-note {
-        color: #9ea0b3;
-        font-size: 0.88rem;
-        margin-top: 6px;
     }
 </style>
 
-<div class="admin-form-page">
-    <div class="admin-form-card">
-        <h1>Add Product</h1>
-        <p>Create a new product for NextGen Mobile Care.</p>
+<div class="admin-products-page">
+    <div class="admin-products-top">
+        <h1>Manage Products</h1>
+        <a href="<?php echo URLROOT; ?>/admin/addProduct" class="btn-add">Add Product</a>
+    </div>
 
-        <form action="<?php echo URLROOT; ?>/admin/addProduct" method="POST" enctype="multipart/form-data">
-
-            <div class="form-group">
-                <label for="name">Product Name</label>
-                <input
-                    type="text"
-                    name="name"
-                    id="name"
-                    class="form-control"
-                    value="<?php echo isset($data['name']) ? htmlspecialchars($data['name']) : ''; ?>"
-                >
-                <div class="text-error">
-                    <?php echo isset($data['name_err']) ? $data['name_err'] : ''; ?>
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label for="price">Price (LKR)</label>
-                <input
-                    type="number"
-                    step="0.01"
-                    name="price"
-                    id="price"
-                    class="form-control"
-                    value="<?php echo isset($data['price']) ? htmlspecialchars($data['price']) : ''; ?>"
-                >
-                <div class="text-error">
-                    <?php echo isset($data['price_err']) ? $data['price_err'] : ''; ?>
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label for="description">Description</label>
-                <textarea
-                    name="description"
-                    id="description"
-                    class="form-control"
-                ><?php echo isset($data['description']) ? htmlspecialchars($data['description']) : ''; ?></textarea>
-                <div class="text-error">
-                    <?php echo isset($data['description_err']) ? $data['description_err'] : ''; ?>
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label for="image">Product Image</label>
-                <input
-                    type="file"
-                    name="image"
-                    id="image"
-                    class="form-control"
-                    accept="image/*"
-                >
-                <div class="file-note">Upload JPG, PNG, or WEBP image.</div>
-                <div class="text-error">
-                    <?php echo isset($data['image_err']) ? $data['image_err'] : ''; ?>
-                </div>
-            </div>
-
-            <div class="form-actions">
-                <button type="submit" class="btn-submit">Add Product</button>
-                <a href="<?php echo URLROOT; ?>/admin/dashboard" class="btn-back">Back to Dashboard</a>
-            </div>
-        </form>
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Image</th>
+                    <th>Name</th>
+                    <th>Price</th>
+                    <th>Description</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php if (!empty($data['products'])) : ?>
+                    <?php foreach ($data['products'] as $product) : ?>
+                        <tr>
+                            <td><?php echo $product->id; ?></td>
+                            <td>
+                                <?php if (!empty($product->image)) : ?>
+                                    <img src="<?php echo URLROOT; ?>/uploads/<?php echo $product->image; ?>" alt="Product" class="product-thumb">
+                                <?php else : ?>
+                                    No Image
+                                <?php endif; ?>
+                            </td>
+                            <td><?php echo htmlspecialchars($product->name); ?></td>
+                            <td>LKR <?php echo number_format($product->price, 2); ?></td>
+                            <td><?php echo htmlspecialchars($product->description); ?></td>
+                            <td>
+                                <div class="action-links">
+                                    <a href="<?php echo URLROOT; ?>/admin/editProduct/<?php echo $product->id; ?>" class="btn-action btn-edit">Edit</a>
+                                    <a href="<?php echo URLROOT; ?>/admin/deleteProduct/<?php echo $product->id; ?>" class="btn-action btn-delete" onclick="return confirm('Delete this product?');">Delete</a>
+                                </div>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                <?php else : ?>
+                    <tr>
+                        <td colspan="6">No products found.</td>
+                    </tr>
+                <?php endif; ?>
+            </tbody>
+        </table>
     </div>
 </div>
 
-<?php require APPROOT . '/app/views/inc/footer.php'; ?>
+<?php require APPROOT . '/views/partials/footer.php'; ?>

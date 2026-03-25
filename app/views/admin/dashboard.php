@@ -142,6 +142,7 @@
         <div class="admin-actions">
             <a href="<?php echo URLROOT; ?>/booking/admin" class="admin-btn">Manage Bookings</a>
             <a href="<?php echo URLROOT; ?>/products" class="admin-btn secondary">View Products</a>
+            <a href="<?php echo URLROOT; ?>/admin/products" class="admin-btn secondary">Manage Products</a>
         </div>
     </div>
 </div>

@@ -2,20 +2,21 @@
 
 session_start();
 
-class Admin extends Controller {
-
-    public function login() {
-        if($_SERVER['REQUEST_METHOD'] === 'POST') {
+class Admin extends Controller
+{
+    public function login()
+    {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $username = trim($_POST['username']);
             $password = trim($_POST['password']);
 
             $adminModel = $this->model('AdminModel');
             $admin = $adminModel->login($username, $password);
 
-            if($admin) {
+            if ($admin) {
                 $_SESSION['admin_id'] = $admin->id;
                 $_SESSION['admin_username'] = $admin->username;
-                header('Location: /nextgen-mobile-care/public/admin/dashboard');
+                header('Location: ' . URLROOT . '/admin/dashboard');
                 exit;
             } else {
                 $error = "Invalid username or password";
@@ -27,155 +28,166 @@ class Admin extends Controller {
     }
 
     public function dashboard()
-{
-    if (!isset($_SESSION['admin_id'])) {
+    {
+        if (!isset($_SESSION['admin_id'])) {
+            header('Location: ' . URLROOT . '/admin/login');
+            exit;
+        }
+
+        $productModel = $this->model('Product');
+        $bookingModel = $this->model('Booking');
+
+        $data = [
+            'product_count' => $productModel->getProductCount(),
+            'booking_count' => $bookingModel->getBookingCount(),
+            'recent_bookings' => $bookingModel->getRecentBookings(5)
+        ];
+
+        $this->view('admin/dashboard', $data);
+    }
+
+    public function logout()
+    {
+        session_unset();
+        session_destroy();
         header('Location: ' . URLROOT . '/admin/login');
         exit;
     }
 
-    $productModel = $this->model('Product');
-    $bookingModel = $this->model('Booking');
+    public function products()
+    {
+        if (!isset($_SESSION['admin_id'])) {
+            header('Location: ' . URLROOT . '/admin/login');
+            exit;
+        }
 
-    $data = [
-        'product_count' => $productModel->getProductCount(),
-        'booking_count' => $bookingModel->getBookingCount(),
-        'recent_bookings' => $bookingModel->getRecentBookings(5)
-    ];
+        $productModel = $this->model('Product');
+        $products = $productModel->getProducts();
 
-    $this->view('admin/dashboard', $data);
+        $data = [
+            'products' => $products
+        ];
+
+        $this->view('admin/products', $data);
+    }
+
+    public function addProduct()
+    {
+        if (!isset($_SESSION['admin_id'])) {
+            header('Location: ' . URLROOT . '/admin/login');
+            exit;
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+           $name = trim($_POST['name']);
+$description = trim($_POST['description']);
+$price = trim($_POST['price']);
+$category = trim($_POST['category']);
+$stock = (int) trim($_POST['stock']);
+
+$imageName = 'default.png';
+
+if (isset($_FILES['image']) && $_FILES['image']['name'] != '') {
+    $imageName = time() . '_' . basename($_FILES['image']['name']);
+    $targetPath = dirname(APPROOT) . '/public/uploads/' . $imageName;
+    move_uploaded_file($_FILES['image']['tmp_name'], $targetPath);
 }
-    public function logout() {
-        session_unset();
-        session_destroy();
-        header('Location: /nextgen-mobile-care/public/admin/login');
-        exit;
-    }
 
-    public function products() {
-        if(!isset($_SESSION['admin_id'])) {
-            header('Location: /nextgen-mobile-care/public/admin/login');
-            exit;
-        }
+$productModel = $this->model('Product');
+$productModel->addProduct($name, $description, $price, $imageName, $category, $stock);
 
-        $productModel = $this->model('Product');
-        $products = $productModel->getAllProducts();
-
-        $this->view('admin/products', ['products' => $products]);
-    }
-
-    public function addProduct() {
-        if(!isset($_SESSION['admin_id'])) {
-            header('Location: /nextgen-mobile-care/public/admin/login');
-            exit;
-        }
-
-        if($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $name = trim($_POST['name']);
-            $description = trim($_POST['description']);
-            $price = trim($_POST['price']);
-
-            if(isset($_FILES['image']) && $_FILES['image']['name'] != '') {
-                $imageName = time() . '_' . basename($_FILES['image']['name']);
-                $targetPath = '../public/assets/images/' . $imageName;
-                move_uploaded_file($_FILES['image']['tmp_name'], $targetPath);
-            } else {
-                $imageName = 'default.png';
-            }
-
-            $productModel = $this->model('Product');
-            $productModel->addProduct($name, $description, $price, $imageName);
-
-            header('Location: /nextgen-mobile-care/public/admin/products');
-            exit;
+header('Location: ' . URLROOT . '/admin/products');
+exit;
         } else {
-            $this->view('admin/product_form');
+            $this->view('admin/add_product');
         }
     }
 
-    public function editProduct($id) {
-        if(!isset($_SESSION['admin_id'])) {
-            header('Location: /nextgen-mobile-care/public/admin/login');
+    public function editProduct($id)
+    {
+        if (!isset($_SESSION['admin_id'])) {
+            header('Location: ' . URLROOT . '/admin/login');
             exit;
         }
 
         $productModel = $this->model('Product');
 
-        if($_SERVER['REQUEST_METHOD'] === 'POST') {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $name = trim($_POST['name']);
-            $description = trim($_POST['description']);
-            $price = trim($_POST['price']);
+$description = trim($_POST['description']);
+$price = trim($_POST['price']);
+$category = trim($_POST['category']);
+$stock = (int) trim($_POST['stock']);
 
-            if(isset($_FILES['image']) && $_FILES['image']['name'] != '') {
-                $imageName = time() . '_' . basename($_FILES['image']['name']);
-                $targetPath = '../public/assets/images/' . $imageName;
-                move_uploaded_file($_FILES['image']['tmp_name'], $targetPath);
-            } else {
-                $imageName = $_POST['old_image'];
-            }
+if (isset($_FILES['image']) && $_FILES['image']['name'] != '') {
+    $imageName = time() . '_' . basename($_FILES['image']['name']);
+    $targetPath = dirname(APPROOT) . '/public/uploads/' . $imageName;
+    move_uploaded_file($_FILES['image']['tmp_name'], $targetPath);
+} else {
+    $imageName = $_POST['old_image'];
+}
 
-            $productModel->updateProduct($id, $name, $description, $price, $imageName);
+$productModel->updateProduct($id, $name, $description, $price, $imageName, $category, $stock);
 
-            header('Location: /nextgen-mobile-care/public/admin/products');
-            exit;
+header('Location: ' . URLROOT . '/admin/products');
+exit;
         } else {
             $product = $productModel->getProductById($id);
             $this->view('admin/product_form', ['product' => $product]);
         }
     }
 
-    public function deleteProduct($id) {
-        if(!isset($_SESSION['admin_id'])) {
-            header('Location: /nextgen-mobile-care/public/admin/login');
+    public function deleteProduct($id)
+    {
+        if (!isset($_SESSION['admin_id'])) {
+            header('Location: ' . URLROOT . '/admin/login');
             exit;
         }
 
         $productModel = $this->model('Product');
-        $productModel->deleteProduct($id);
 
-        header('Location: /nextgen-mobile-care/public/admin/products');
-        exit;
-    }
-    public function bookings() {
-    if(!isset($_SESSION['admin_id'])) {
-        header('Location: /nextgen-mobile-care/public/admin/login');
-        exit;
+        if ($productModel->deleteProduct($id)) {
+            header('Location: ' . URLROOT . '/admin/products');
+            exit;
+        } else {
+            die('Failed to delete product');
+        }
     }
 
-    $bookingModel = $this->model('Booking');
-    $bookings = $bookingModel->getAllBookings();
+    public function bookings()
+    {
+        if (!isset($_SESSION['admin_id'])) {
+            header('Location: ' . URLROOT . '/admin/login');
+            exit;
+        }
 
-    $this->view('admin/bookings', ['bookings' => $bookings]);
-}
-public function products()
+        $bookingModel = $this->model('Booking');
+        $bookings = $bookingModel->getAllBookings();
+
+        $this->view('admin/bookings', ['bookings' => $bookings]);
+    }
+    public function messages()
 {
     if (!isset($_SESSION['admin_id'])) {
         header('Location: ' . URLROOT . '/admin/login');
         exit;
     }
 
-    $productModel = $this->model('Product');
-    $products = $productModel->getProducts();
+    $contactModel = $this->model('Contact');
+    $messages = $contactModel->getAllMessages();
 
-    $data = [
-        'products' => $products
-    ];
-
-    $this->view('admin/products', $data);
+    $this->view('admin/messages', ['messages' => $messages]);
 }
-
-public function deleteProduct($id)
+public function orders()
 {
     if (!isset($_SESSION['admin_id'])) {
         header('Location: ' . URLROOT . '/admin/login');
         exit;
     }
 
-    $productModel = $this->model('Product');
+    $orderRequestModel = $this->model('OrderRequest');
+    $orders = $orderRequestModel->getAllOrderRequests();
 
-    if ($productModel->deleteProduct($id)) {
-        header('Location: ' . URLROOT . '/admin/products');
-        exit;
-    } else {
-        die('Failed to delete product');
-    }
+    $this->view('admin/orders', ['orders' => $orders]);
+}
 }
