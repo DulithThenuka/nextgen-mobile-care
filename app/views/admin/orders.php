@@ -1,43 +1,362 @@
 <?php require APPROOT . '/views/partials/header.php'; ?>
 
-<div style="max-width:1200px; margin:50px auto; padding:20px;">
-    <h1 style="margin-bottom:25px;">Order Requests</h1>
+<style>
+.admin-orders-page {
+    padding: 40px 0 60px;
+    background:
+        radial-gradient(circle at top left, rgba(59,130,246,0.12), transparent 25%),
+        radial-gradient(circle at bottom right, rgba(6,182,212,0.10), transparent 25%),
+        #0b0f19;
+    min-height: 100vh;
+}
 
-    <div style="overflow-x:auto; background:#15151d; border:1px solid #242433; border-radius:16px; padding:20px;">
-        <table style="width:100%; border-collapse:collapse; color:#fff;">
-            <thead>
-                <tr>
-                    <th style="padding:12px; border-bottom:1px solid #2a2a3a; text-align:left;">ID</th>
-                    <th style="padding:12px; border-bottom:1px solid #2a2a3a; text-align:left;">Product</th>
-                    <th style="padding:12px; border-bottom:1px solid #2a2a3a; text-align:left;">Customer</th>
-                    <th style="padding:12px; border-bottom:1px solid #2a2a3a; text-align:left;">Phone</th>
-                    <th style="padding:12px; border-bottom:1px solid #2a2a3a; text-align:left;">Address</th>
-                    <th style="padding:12px; border-bottom:1px solid #2a2a3a; text-align:left;">Qty</th>
-                    <th style="padding:12px; border-bottom:1px solid #2a2a3a; text-align:left;">Status</th>
-                    <th style="padding:12px; border-bottom:1px solid #2a2a3a; text-align:left;">Date</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php if (!empty($orders)) : ?>
-                    <?php foreach ($orders as $order) : ?>
-                        <tr>
-                            <td style="padding:12px; border-bottom:1px solid #2a2a3a;"><?php echo $order->id; ?></td>
-                            <td style="padding:12px; border-bottom:1px solid #2a2a3a;"><?php echo htmlspecialchars($order->product_name); ?></td>
-                            <td style="padding:12px; border-bottom:1px solid #2a2a3a;"><?php echo htmlspecialchars($order->customer_name); ?></td>
-                            <td style="padding:12px; border-bottom:1px solid #2a2a3a;"><?php echo htmlspecialchars($order->phone); ?></td>
-                            <td style="padding:12px; border-bottom:1px solid #2a2a3a;"><?php echo htmlspecialchars($order->address); ?></td>
-                            <td style="padding:12px; border-bottom:1px solid #2a2a3a;"><?php echo (int)$order->quantity; ?></td>
-                            <td style="padding:12px; border-bottom:1px solid #2a2a3a;"><?php echo htmlspecialchars($order->status); ?></td>
-                            <td style="padding:12px; border-bottom:1px solid #2a2a3a;"><?php echo htmlspecialchars($order->created_at); ?></td>
-                        </tr>
-                    <?php endforeach; ?>
-                <?php else : ?>
-                    <tr>
-                        <td colspan="8" style="padding:12px;">No order requests found.</td>
-                    </tr>
-                <?php endif; ?>
-            </tbody>
-        </table>
+.admin-orders-topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 28px;
+}
+
+.admin-orders-topbar h1 {
+    font-size: 2rem;
+    margin-bottom: 6px;
+    color: #fff;
+}
+
+.admin-orders-topbar p {
+    color: #9fb0c7;
+    margin: 0;
+}
+
+.summary-badges {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.summary-badge {
+    display: inline-block;
+    padding: 10px 14px;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 700;
+    border: 1px solid rgba(255,255,255,0.08);
+    background: rgba(255,255,255,0.04);
+    color: #dbe7f5;
+}
+
+.orders-card {
+    background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.03));
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 22px;
+    overflow: hidden;
+    box-shadow: 0 16px 36px rgba(0,0,0,0.22);
+}
+
+.table-wrap {
+    overflow-x: auto;
+}
+
+.orders-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 1220px;
+}
+
+.orders-table thead {
+    background: rgba(255,255,255,0.04);
+}
+
+.orders-table th,
+.orders-table td {
+    padding: 18px 16px;
+    text-align: left;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    vertical-align: top;
+}
+
+.orders-table th {
+    color: #dbe7f5;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+}
+
+.orders-table td {
+    color: #c7d2e3;
+    font-size: 14px;
+}
+
+.orders-table tbody tr {
+    transition: 0.25s ease;
+}
+
+.orders-table tbody tr:hover {
+    background: rgba(255,255,255,0.03);
+}
+
+.customer-name,
+.product-name {
+    color: #ffffff;
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+.sub-text {
+    color: #9fb0c7;
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+.address-box {
+    max-width: 260px;
+    line-height: 1.7;
+}
+
+.qty-box {
+    display: inline-block;
+    min-width: 44px;
+    text-align: center;
+    padding: 8px 12px;
+    border-radius: 10px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.08);
+    color: #fff;
+    font-weight: 700;
+}
+
+.badge {
+    display: inline-block;
+    padding: 7px 12px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.badge-product {
+    background: rgba(59,130,246,0.12);
+    color: #93c5fd;
+    border: 1px solid rgba(59,130,246,0.20);
+}
+
+.badge-pending {
+    background: rgba(245,158,11,0.12);
+    color: #fcd34d;
+    border: 1px solid rgba(245,158,11,0.20);
+}
+
+.badge-approved,
+.badge-confirmed {
+    background: rgba(16,185,129,0.12);
+    color: #86efac;
+    border: 1px solid rgba(16,185,129,0.20);
+}
+
+.badge-completed {
+    background: rgba(6,182,212,0.12);
+    color: #67e8f9;
+    border: 1px solid rgba(6,182,212,0.20);
+}
+
+.badge-rejected,
+.badge-cancelled {
+    background: rgba(239,68,68,0.12);
+    color: #fca5a5;
+    border: 1px solid rgba(239,68,68,0.20);
+}
+
+.action-group {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.action-btn {
+    display: inline-block;
+    padding: 9px 14px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: 0.25s ease;
+}
+
+.view-btn {
+    background: rgba(59,130,246,0.12);
+    color: #93c5fd;
+    border: 1px solid rgba(59,130,246,0.20);
+}
+
+.view-btn:hover {
+    background: rgba(59,130,246,0.20);
+}
+
+.approve-btn {
+    background: rgba(16,185,129,0.12);
+    color: #86efac;
+    border: 1px solid rgba(16,185,129,0.20);
+}
+
+.approve-btn:hover {
+    background: rgba(16,185,129,0.18);
+}
+
+.reject-btn {
+    background: rgba(239,68,68,0.12);
+    color: #fca5a5;
+    border: 1px solid rgba(239,68,68,0.20);
+}
+
+.reject-btn:hover {
+    background: rgba(239,68,68,0.18);
+}
+
+.empty-state {
+    padding: 40px 24px;
+    text-align: center;
+    color: #9fb0c7;
+}
+
+.empty-state h3 {
+    color: #fff;
+    margin-bottom: 8px;
+}
+
+@media (max-width: 768px) {
+    .admin-orders-page {
+        padding: 30px 0 50px;
+    }
+
+    .admin-orders-topbar h1 {
+        font-size: 1.7rem;
+    }
+}
+</style>
+
+<?php
+$orders = $data['orders'] ?? [];
+
+$totalOrders = count($orders);
+$pendingCount = 0;
+$approvedCount = 0;
+$rejectedCount = 0;
+
+foreach ($orders as $order) {
+    $statusValue = strtolower(trim($order->status ?? 'pending'));
+
+    if ($statusValue === 'pending') {
+        $pendingCount++;
+    } elseif (in_array($statusValue, ['approved', 'confirmed', 'completed'])) {
+        $approvedCount++;
+    } elseif (in_array($statusValue, ['rejected', 'cancelled'])) {
+        $rejectedCount++;
+    }
+}
+?>
+
+<div class="admin-orders-page">
+    <div class="container">
+
+        <div class="admin-orders-topbar">
+            <div>
+                <h1>Manage Order Requests</h1>
+                <p>Review customer product orders, approve requests, and monitor order status.</p>
+            </div>
+
+            <div class="summary-badges">
+                <span class="summary-badge">Total: <?php echo $totalOrders; ?></span>
+                <span class="summary-badge">Pending: <?php echo $pendingCount; ?></span>
+                <span class="summary-badge">Approved: <?php echo $approvedCount; ?></span>
+                <span class="summary-badge">Rejected: <?php echo $rejectedCount; ?></span>
+            </div>
+        </div>
+
+        <div class="orders-card">
+            <?php if (!empty($orders)) : ?>
+                <div class="table-wrap">
+                    <table class="orders-table">
+                        <thead>
+                            <tr>
+                                <th>Customer</th>
+                                <th>Product</th>
+                                <th>Phone</th>
+                                <th>Address</th>
+                                <th>Quantity</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($orders as $order) : ?>
+                                <?php
+                                    $status = strtolower(trim($order->status ?? 'pending'));
+                                    $statusClass = 'badge-pending';
+
+                                    if (in_array($status, ['approved', 'confirmed'])) {
+                                        $statusClass = 'badge-approved';
+                                    } elseif ($status === 'completed') {
+                                        $statusClass = 'badge-completed';
+                                    } elseif (in_array($status, ['rejected', 'cancelled'])) {
+                                        $statusClass = 'badge-rejected';
+                                    }
+
+                                    $address = !empty($order->address) ? $order->address : 'No address provided.';
+                                    if (strlen($address) > 95) {
+                                        $address = substr($address, 0, 95) . '...';
+                                    }
+                                ?>
+                                <tr>
+                                    <td>
+                                        <div class="customer-name"><?php echo htmlspecialchars($order->customer_name ?? $order->name ?? 'Unknown Customer'); ?></div>
+                                    </td>
+
+                                    <td>
+                                        <div class="product-name"><?php echo htmlspecialchars($order->product_name ?? 'Unknown Product'); ?></div>
+                                        <?php if (!empty($order->product_id)) : ?>
+                                            <div class="sub-text">Product ID: <?php echo htmlspecialchars($order->product_id); ?></div>
+                                        <?php endif; ?>
+                                    </td>
+
+                                    <td>
+                                        <div class="sub-text"><?php echo htmlspecialchars($order->phone ?? 'No phone'); ?></div>
+                                    </td>
+
+                                    <td>
+                                        <div class="address-box"><?php echo htmlspecialchars($address); ?></div>
+                                    </td>
+
+                                    <td>
+                                        <span class="qty-box"><?php echo (int)($order->quantity ?? 0); ?></span>
+                                    </td>
+
+                                    <td>
+                                        <span class="badge <?php echo $statusClass; ?>">
+                                            <?php echo htmlspecialchars(ucfirst($order->status ?? 'Pending')); ?>
+                                        </span>
+                                    </td>
+
+                                    <td>
+                                        <div class="action-group">
+                                            <a href="<?php echo URLROOT; ?>/admin/view_order/<?php echo $order->id; ?>" class="action-btn view-btn">View</a>
+                                            <a href="<?php echo URLROOT; ?>/admin/approve_order/<?php echo $order->id; ?>" class="action-btn approve-btn">Approve</a>
+                                            <a href="<?php echo URLROOT; ?>/admin/reject_order/<?php echo $order->id; ?>" class="action-btn reject-btn" onclick="return confirm('Are you sure you want to reject this order?');">Reject</a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+            <?php else : ?>
+                <div class="empty-state">
+                    <h3>No order requests found</h3>
+                    <p>Customer product order requests will appear here once they are submitted.</p>
+                </div>
+            <?php endif; ?>
+        </div>
+
     </div>
 </div>
 

@@ -1,149 +1,177 @@
 <?php require APPROOT . '/views/partials/header.php'; ?>
 
 <style>
-    .admin-dashboard {
-        max-width: 1200px;
-        margin: 50px auto;
-        padding: 20px;
-    }
+.admin-dashboard {
+    padding: 40px 0;
+    background:
+        radial-gradient(circle at top left, rgba(59,130,246,0.12), transparent 25%),
+        radial-gradient(circle at bottom right, rgba(6,182,212,0.10), transparent 25%),
+        #0b0f19;
+    min-height: 100vh;
+}
 
-    .admin-dashboard h1 {
-        margin-bottom: 25px;
-    }
+/* TITLE */
+.dashboard-header {
+    margin-bottom: 30px;
+}
 
-    .stats-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-        gap: 20px;
-        margin-bottom: 35px;
-    }
+.dashboard-header h1 {
+    font-size: 2rem;
+    margin-bottom: 8px;
+}
 
-    .stat-card {
-        background: #15151d;
-        border: 1px solid #242433;
-        border-radius: 18px;
-        padding: 25px;
-        box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-    }
+.dashboard-header p {
+    color: #9fb0c7;
+}
 
-    .stat-card h3 {
-        color: #bdbdcc;
-        margin-bottom: 10px;
-        font-size: 1rem;
-    }
+/* GRID */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+}
 
-    .stat-card .stat-number {
-        font-size: 2rem;
-        font-weight: 700;
-        color: #fff;
-    }
+/* CARD */
+.stat-card {
+    background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.03));
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 18px;
+    padding: 25px;
+    transition: 0.3s ease;
+    position: relative;
+}
 
-    .recent-box {
-        background: #15151d;
-        border: 1px solid #242433;
-        border-radius: 18px;
-        padding: 25px;
-    }
+.stat-card:hover {
+    transform: translateY(-5px);
+    border-color: rgba(77,163,255,0.3);
+    box-shadow: 0 15px 30px rgba(0,0,0,0.35);
+}
 
-    .recent-box h2 {
-        margin-bottom: 20px;
-    }
+/* ICON */
+.stat-icon {
+    font-size: 28px;
+    margin-bottom: 12px;
+}
 
-    .table-wrap {
-        overflow-x: auto;
-    }
+/* TITLE */
+.stat-card h3 {
+    font-size: 15px;
+    color: #9fb0c7;
+    margin-bottom: 10px;
+}
 
-    table {
-        width: 100%;
-        border-collapse: collapse;
-        color: #fff;
-    }
+/* VALUE */
+.stat-value {
+    font-size: 26px;
+    font-weight: 800;
+}
 
-    table th, table td {
-        padding: 12px;
-        border-bottom: 1px solid #2a2a3a;
-        text-align: left;
-    }
+/* COLORS */
+.blue { color: #3b82f6; }
+.green { color: #10b981; }
+.orange { color: #f59e0b; }
+.red { color: #ef4444; }
 
-    .admin-actions {
-        margin-top: 30px;
-        display: flex;
-        gap: 15px;
-        flex-wrap: wrap;
-    }
+/* ACTIONS */
+.quick-actions {
+    margin-top: 40px;
+}
 
-    .admin-btn {
-        display: inline-block;
-        padding: 12px 18px;
-        border-radius: 10px;
-        background: #fff;
-        color: #111;
-        font-weight: 600;
-    }
+.quick-actions h2 {
+    margin-bottom: 15px;
+}
 
-    .admin-btn.secondary {
-        background: transparent;
-        color: #fff;
-        border: 1px solid #3a3a50;
+.actions-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+}
+
+.action-btn {
+    display: block;
+    padding: 16px;
+    text-align: center;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    color: #fff;
+    text-decoration: none;
+    font-weight: 600;
+    transition: 0.3s;
+}
+
+.action-btn:hover {
+    background: rgba(59,130,246,0.15);
+    border-color: #3b82f6;
+    transform: translateY(-3px);
+}
+
+/* RESPONSIVE */
+@media(max-width: 900px){
+    .stats-grid,
+    .actions-grid {
+        grid-template-columns: repeat(2, 1fr);
     }
+}
+
+@media(max-width: 500px){
+    .stats-grid,
+    .actions-grid {
+        grid-template-columns: 1fr;
+    }
+}
 </style>
 
 <div class="admin-dashboard">
-    <h1>Admin Dashboard</h1>
+    <div class="container">
 
-    <div class="stats-grid">
-        <div class="stat-card">
-            <h3>Total Products</h3>
-            <div class="stat-number"><?php echo $data['product_count']; ?></div>
+        <!-- HEADER -->
+        <div class="dashboard-header">
+            <h1>Admin Dashboard</h1>
+            <p>Manage your system, monitor activity, and control your platform.</p>
         </div>
 
-        <div class="stat-card">
-            <h3>Total Bookings</h3>
-            <div class="stat-number"><?php echo $data['booking_count']; ?></div>
-        </div>
-    </div>
+        <!-- STATS -->
+        <div class="stats-grid">
 
-    <div class="recent-box">
-        <h2>Recent Bookings</h2>
+            <div class="stat-card">
+                <div class="stat-icon blue">📅</div>
+                <h3>Total Bookings</h3>
+                <div class="stat-value"><?php echo $data['bookings_count'] ?? 0; ?></div>
+            </div>
 
-        <div class="table-wrap">
-            <table>
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Customer</th>
-                        <th>Device</th>
-                        <th>Service</th>
-                        <th>Date</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php if (!empty($data['recent_bookings'])) : ?>
-                        <?php foreach ($data['recent_bookings'] as $booking) : ?>
-                            <tr>
-                                <td><?php echo $booking->id; ?></td>
-                                <td><?php echo htmlspecialchars($booking->customer_name); ?></td>
-                                <td><?php echo htmlspecialchars($booking->device_model); ?></td>
-                                <td><?php echo htmlspecialchars($booking->service_type); ?></td>
-                                <td><?php echo htmlspecialchars($booking->booking_date); ?></td>
-                                <td><?php echo htmlspecialchars($booking->status); ?></td>
-                            </tr>
-                        <?php endforeach; ?>
-                    <?php else : ?>
-                        <tr>
-                            <td colspan="6">No recent bookings found.</td>
-                        </tr>
-                    <?php endif; ?>
-                </tbody>
-            </table>
+            <div class="stat-card">
+                <div class="stat-icon green">🛒</div>
+                <h3>Order Requests</h3>
+                <div class="stat-value"><?php echo $data['orders_count'] ?? 0; ?></div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon orange">📦</div>
+                <h3>Total Products</h3>
+                <div class="stat-value"><?php echo $data['products_count'] ?? 0; ?></div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon red">✉️</div>
+                <h3>Messages</h3>
+                <div class="stat-value"><?php echo $data['messages_count'] ?? 0; ?></div>
+            </div>
+
         </div>
 
-        <div class="admin-actions">
-            <a href="<?php echo URLROOT; ?>/booking/admin" class="admin-btn">Manage Bookings</a>
-            <a href="<?php echo URLROOT; ?>/products" class="admin-btn secondary">View Products</a>
-            <a href="<?php echo URLROOT; ?>/admin/products" class="admin-btn secondary">Manage Products</a>
+        <!-- QUICK ACTIONS -->
+        <div class="quick-actions">
+            <h2>Quick Actions</h2>
+
+            <div class="actions-grid">
+                <a href="<?php echo URLROOT; ?>/admin/products" class="action-btn">Manage Products</a>
+                <a href="<?php echo URLROOT; ?>/admin/bookings" class="action-btn">View Bookings</a>
+                <a href="<?php echo URLROOT; ?>/admin/orders" class="action-btn">Order Requests</a>
+                <a href="<?php echo URLROOT; ?>/admin/message" class="action-btn">Contact Messages</a>
+            </div>
         </div>
+
     </div>
 </div>
 

@@ -54,10 +54,35 @@ class Booking
     return $row->total;
 }
 
-public function getRecentBookings($limit = 5)
+public function getTotalBookings() {
+    $this->db->query("SELECT COUNT(*) as total FROM bookings");
+    $row = $this->db->single();
+    return $row->total;
+}
+
+public function getRecentBookings($limit = 5) {
+    $this->db->query("SELECT * FROM bookings ORDER BY id DESC LIMIT $limit");
+    return $this->db->resultSet();
+}
+public function getBookingStatusCounts()
 {
-    $this->db->query("SELECT * FROM bookings ORDER BY id DESC LIMIT :limit");
-    $this->db->bind(':limit', (int)$limit, PDO::PARAM_INT);
+    $this->db->query("SELECT status, COUNT(*) as total FROM bookings GROUP BY status");
+    return $this->db->resultSet();
+}
+
+public function getMonthlyBookings()
+{
+    $this->db->query("
+        SELECT 
+            YEAR(created_at) as year_num,
+            MONTH(created_at) as month_num,
+            DATE_FORMAT(MIN(created_at), '%b %Y') as month_label,
+            COUNT(*) as total
+        FROM bookings
+        WHERE created_at >= DATE_SUB(NOW(), INTERVAL 5 MONTH)
+        GROUP BY YEAR(created_at), MONTH(created_at)
+        ORDER BY YEAR(created_at), MONTH(created_at)
+    ");
     return $this->db->resultSet();
 }
 }

@@ -1,192 +1,497 @@
 <?php require APPROOT . '/views/partials/header.php'; ?>
 
+<?php
+$products = isset($data['products']) ? $data['products'] : [];
+
+$search = isset($_GET['search']) ? trim($_GET['search']) : '';
+$category = isset($_GET['category']) ? trim($_GET['category']) : '';
+$sort = isset($_GET['sort']) ? trim($_GET['sort']) : '';
+
+$categories = [];
+foreach ($products as $product) {
+    if (!empty($product->category) && !in_array($product->category, $categories)) {
+        $categories[] = $product->category;
+    }
+}
+sort($categories);
+
+$filteredProducts = $products;
+
+if ($search !== '') {
+    $filteredProducts = array_filter($filteredProducts, function($product) use ($search) {
+        return stripos($product->name, $search) !== false;
+    });
+}
+
+if ($category !== '') {
+    $filteredProducts = array_filter($filteredProducts, function($product) use ($category) {
+        return isset($product->category) && $product->category === $category;
+    });
+}
+
+if ($sort === 'price_asc') {
+    usort($filteredProducts, function($a, $b) {
+        return $a->price <=> $b->price;
+    });
+} elseif ($sort === 'price_desc') {
+    usort($filteredProducts, function($a, $b) {
+        return $b->price <=> $a->price;
+    });
+} elseif ($sort === 'name_asc') {
+    usort($filteredProducts, function($a, $b) {
+        return strcmp($a->name, $b->name);
+    });
+}
+?>
+
 <style>
     .products-page {
-        padding: 60px 20px;
-        max-width: 1200px;
-        margin: auto;
+        padding: 70px 0 80px;
+        background:
+            radial-gradient(circle at top left, rgba(59,130,246,0.16), transparent 25%),
+            radial-gradient(circle at bottom right, rgba(6,182,212,0.12), transparent 25%),
+            linear-gradient(180deg, #0b0f19 0%, #101827 100%);
+        min-height: 100vh;
     }
 
-    .products-title {
-        text-align: center;
+    .products-hero {
+        margin-bottom: 35px;
+    }
+
+    .products-badge {
+        display: inline-block;
+        padding: 8px 14px;
+        background: rgba(77, 163, 255, 0.12);
+        border: 1px solid rgba(77, 163, 255, 0.30);
+        color: #8ec5ff;
+        border-radius: 999px;
+        font-size: 13px;
+        margin-bottom: 16px;
+    }
+
+    .products-hero h1 {
+        font-size: 42px;
+        margin-bottom: 12px;
+        color: #fff;
+    }
+
+    .products-hero p {
+        color: #b8c4d8;
+        font-size: 17px;
+        max-width: 760px;
+    }
+
+    .products-toolbar {
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 20px;
+        padding: 22px;
         margin-bottom: 30px;
+        box-shadow: 0 16px 40px rgba(0,0,0,0.22);
     }
 
-    .products-title h1 {
-        font-size: 2.2rem;
-        margin-bottom: 10px;
-    }
-
-    .products-title p {
-        color: #bbb;
-    }
-
-    .filter-bar {
-        background: #15151d;
-        border: 1px solid #242433;
-        border-radius: 16px;
-        padding: 20px;
-        margin-bottom: 30px;
-    }
-
-    .filter-form {
+    .toolbar-form {
         display: grid;
-        grid-template-columns: 1fr 220px 220px 140px;
-        gap: 15px;
+        grid-template-columns: 1.4fr 1fr 1fr auto;
+        gap: 14px;
+        align-items: end;
     }
 
-    .filter-input,
-    .filter-select {
+    .toolbar-group label {
+        display: block;
+        margin-bottom: 8px;
+        color: #dbe7f5;
+        font-size: 14px;
+        font-weight: 600;
+    }
+
+    .toolbar-group input,
+    .toolbar-group select {
         width: 100%;
-        padding: 12px 14px;
-        border-radius: 10px;
-        border: 1px solid #33334a;
-        background: #0f0f15;
+        padding: 13px 14px;
+        border-radius: 12px;
+        border: 1px solid rgba(255,255,255,0.10);
+        background: #0f172a;
         color: #fff;
         outline: none;
     }
 
-    .filter-btn {
-        border: none;
-        border-radius: 10px;
-        background: #fff;
-        color: #111;
+    .toolbar-group input::placeholder {
+        color: #90a0b8;
+    }
+
+    .toolbar-group input:focus,
+    .toolbar-group select:focus {
+        border-color: #4da3ff;
+        box-shadow: 0 0 0 3px rgba(77,163,255,0.12);
+    }
+
+    .toolbar-buttons {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .filter-btn,
+    .clear-btn,
+    .details-btn {
+        display: inline-block;
+        text-decoration: none;
+        border-radius: 12px;
+        padding: 13px 18px;
         font-weight: 700;
+        transition: 0.3s ease;
+        border: none;
         cursor: pointer;
-        padding: 12px 16px;
+    }
+
+    .filter-btn {
+        background: linear-gradient(135deg, #3b82f6, #06b6d4);
+        color: #fff;
+    }
+
+    .filter-btn:hover,
+    .details-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 22px rgba(59,130,246,0.22);
+    }
+
+    .clear-btn {
+        background: transparent;
+        border: 1px solid rgba(255,255,255,0.12);
+        color: #fff;
+    }
+
+    .clear-btn:hover {
+        border-color: #4da3ff;
+        color: #4da3ff;
+    }
+
+    .products-summary {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 24px;
+        flex-wrap: wrap;
+    }
+
+    .products-summary h3 {
+        font-size: 20px;
+        color: #fff;
+        margin: 0;
+    }
+
+    .products-summary p {
+        margin: 0;
+        color: #9fb0c7;
     }
 
     .products-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 25px;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 24px;
     }
 
     .product-card {
-        background: #15151d;
-        border: 1px solid #242433;
-        border-radius: 16px;
-        padding: 20px;
+        position: relative;
+        background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.03));
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 22px;
+        overflow: hidden;
+        box-shadow: 0 18px 45px rgba(0,0,0,0.22);
         transition: 0.3s ease;
     }
 
-    .product-card img {
-        width: 100%;
-        height: 200px;
-        object-fit: cover;
-        border-radius: 12px;
-        margin-bottom: 15px;
+    .product-card:hover {
+        transform: translateY(-8px);
+        border-color: rgba(77,163,255,0.28);
+        box-shadow: 0 24px 50px rgba(0,0,0,0.30);
     }
 
-    .product-card h3 {
+    .product-image-wrap {
+        height: 240px;
+        background: linear-gradient(135deg, #0f172a, #1e293b);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 18px;
+        position: relative;
+    }
+
+    .product-image-wrap img {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+    }
+
+    .stock-badge,
+    .category-badge {
+        position: absolute;
+        top: 16px;
+        padding: 7px 12px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+    .category-badge {
+        left: 16px;
+        background: rgba(15, 23, 42, 0.85);
+        color: #dbe7f5;
+        border: 1px solid rgba(255,255,255,0.10);
+    }
+
+    .stock-badge {
+        right: 16px;
+        color: #fff;
+    }
+
+    .stock-in {
+        background: linear-gradient(135deg, #059669, #10b981);
+    }
+
+    .stock-low {
+        background: linear-gradient(135deg, #d97706, #f59e0b);
+    }
+
+    .stock-out {
+        background: linear-gradient(135deg, #dc2626, #ef4444);
+    }
+
+    .product-content {
+        padding: 22px;
+    }
+
+    .product-name {
+        font-size: 22px;
+        font-weight: 700;
+        color: #fff;
         margin-bottom: 10px;
     }
 
-    .product-card p {
-        color: #ccc;
-        font-size: 0.9rem;
-        margin-bottom: 10px;
+    .product-desc {
+        color: #b8c4d8;
+        font-size: 15px;
+        line-height: 1.6;
+        margin-bottom: 18px;
+        min-height: 72px;
     }
 
-    .price {
-        font-weight: bold;
-        margin-bottom: 8px;
+    .product-meta {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        align-items: center;
+        margin-bottom: 18px;
+        flex-wrap: wrap;
     }
 
-    .meta {
-        font-size: 0.9rem;
-        color: #bdbdcc;
-        margin-bottom: 12px;
+    .product-price {
+        font-size: 24px;
+        font-weight: 800;
+        color: #7dd3fc;
     }
 
-    .btn-buy {
+    .product-stock-text {
+        color: #dbe7f5;
+        font-size: 14px;
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.08);
+        padding: 8px 12px;
+        border-radius: 10px;
+    }
+
+    .product-actions {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .details-btn {
+        background: linear-gradient(135deg, #3b82f6, #06b6d4);
+        color: #fff;
+        text-align: center;
+        flex: 1;
+    }
+
+    .out-stock-btn {
         display: inline-block;
-        background: #fff;
-        color: #111;
-        padding: 8px 15px;
-        border-radius: 8px;
-        font-weight: 600;
+        flex: 1;
+        text-align: center;
+        border-radius: 12px;
+        padding: 13px 18px;
+        font-weight: 700;
+        background: rgba(239,68,68,0.12);
+        color: #fca5a5;
+        border: 1px solid rgba(239,68,68,0.18);
     }
 
-    .out-of-stock-badge {
-    display: inline-block;
-    padding: 4px 10px;
-    border-radius: 999px;
-    background: #7a1f1f;
-    color: #fff;
-    font-size: 0.8rem;
-    font-weight: 700;
-}
+    .empty-products {
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 20px;
+        padding: 40px 25px;
+        text-align: center;
+        color: #b8c4d8;
+    }
+
+    @media (max-width: 992px) {
+        .toolbar-form,
+        .products-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .products-hero h1 {
+            font-size: 34px;
+        }
+    }
 
     @media (max-width: 768px) {
-        .filter-form {
+        .toolbar-form,
+        .products-grid {
             grid-template-columns: 1fr;
+        }
+
+        .products-page {
+            padding: 50px 0 65px;
+        }
+
+        .products-hero h1 {
+            font-size: 28px;
+        }
+
+        .product-image-wrap {
+            height: 220px;
         }
     }
 </style>
 
-<div class="products-page">
-    <div class="products-title">
-        <h1>Our Products</h1>
-        <p>Explore our available mobile devices and accessories</p>
-    </div>
-
-    <div class="filter-bar">
-        <form action="<?php echo URLROOT; ?>/products" method="GET" class="filter-form">
-            <input
-                type="text"
-                name="search"
-                class="filter-input"
-                placeholder="Search by product name..."
-                value="<?php echo htmlspecialchars($data['search'] ?? ''); ?>"
-            >
-
-            <select name="category" class="filter-select">
-                <option value="">All Categories</option>
-                <option value="Phones" <?php echo (($data['category'] ?? '') === 'Phones') ? 'selected' : ''; ?>>Phones</option>
-                <option value="Accessories" <?php echo (($data['category'] ?? '') === 'Accessories') ? 'selected' : ''; ?>>Accessories</option>
-                <option value="Tablets" <?php echo (($data['category'] ?? '') === 'Tablets') ? 'selected' : ''; ?>>Tablets</option>
-                <option value="Smart Watches" <?php echo (($data['category'] ?? '') === 'Smart Watches') ? 'selected' : ''; ?>>Smart Watches</option>
-            </select>
-
-            <select name="sort" class="filter-select">
-                <option value="">Sort By</option>
-                <option value="price_asc" <?php echo (($data['sort'] ?? '') === 'price_asc') ? 'selected' : ''; ?>>Price: Low to High</option>
-                <option value="price_desc" <?php echo (($data['sort'] ?? '') === 'price_desc') ? 'selected' : ''; ?>>Price: High to Low</option>
-            </select>
-
-            <button type="submit" class="filter-btn">Apply</button>
-        </form>
-    </div>
-
-    <div class="products-grid">
-        <?php if (!empty($data['products'])) : ?>
-            <?php foreach ($data['products'] as $product) : ?>
-    <div class="product-card">
-        <img src="<?php echo !empty($product->image) ? URLROOT . '/uploads/' . $product->image : 'https://via.placeholder.com/300'; ?>" alt="Product">
-
-        <h3><?php echo htmlspecialchars($product->name); ?></h3>
-        <p><?php echo htmlspecialchars($product->description); ?></p>
-
-        <div class="price">LKR <?php echo number_format($product->price, 2); ?></div>
-
-        <div class="meta">
-            Category: <?php echo htmlspecialchars($product->category); ?><br>
-            Stock:
-            <?php if ((int)$product->stock > 0) : ?>
-                <?php echo (int)$product->stock; ?>
-            <?php else : ?>
-                <span class="out-of-stock-badge">Out of Stock</span>
-            <?php endif; ?>
+<section class="products-page">
+    <div class="container">
+        <div class="products-hero">
+            <span class="products-badge">Premium Accessories & Device Solutions</span>
+            <h1>Explore Our Products</h1>
+            <p>
+                Browse premium mobile accessories, compare categories, and find the right products
+                for your device with a cleaner and more modern shopping experience.
+            </p>
         </div>
 
-        <a href="<?php echo URLROOT; ?>/products/show/<?php echo $product->id; ?>" class="btn-buy">View</a>
-    </div>
-<?php endforeach; ?>
+        <div class="products-toolbar">
+            <form action="" method="GET" class="toolbar-form">
+                <div class="toolbar-group">
+                    <label for="search">Search</label>
+                    <input
+                        type="text"
+                        id="search"
+                        name="search"
+                        placeholder="Search by product name"
+                        value="<?php echo htmlspecialchars($search); ?>"
+                    >
+                </div>
+
+                <div class="toolbar-group">
+                    <label for="category">Category</label>
+                    <select name="category" id="category">
+                        <option value="">All Categories</option>
+                        <?php foreach ($categories as $cat) : ?>
+                            <option value="<?php echo htmlspecialchars($cat); ?>" <?php echo ($category === $cat) ? 'selected' : ''; ?>>
+                                <?php echo htmlspecialchars($cat); ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+
+                <div class="toolbar-group">
+                    <label for="sort">Sort</label>
+                    <select name="sort" id="sort">
+                        <option value="">Default</option>
+                        <option value="price_asc" <?php echo ($sort === 'price_asc') ? 'selected' : ''; ?>>Price: Low to High</option>
+                        <option value="price_desc" <?php echo ($sort === 'price_desc') ? 'selected' : ''; ?>>Price: High to Low</option>
+                        <option value="name_asc" <?php echo ($sort === 'name_asc') ? 'selected' : ''; ?>>Name: A to Z</option>
+                    </select>
+                </div>
+
+                <div class="toolbar-buttons">
+                    <button type="submit" class="filter-btn">Apply</button>
+                    <a href="<?php echo URLROOT; ?>/products" class="clear-btn">Reset</a>
+                </div>
+            </form>
+        </div>
+
+        <div class="products-summary">
+            <div>
+                <h3>Available Products</h3>
+                <p><?php echo count($filteredProducts); ?> product(s) found</p>
+            </div>
+        </div>
+
+        <?php if (!empty($filteredProducts)) : ?>
+            <div class="products-grid">
+                <?php foreach ($filteredProducts as $product) : ?>
+                    <?php
+                        $stockClass = 'stock-in';
+                        $stockLabel = 'In Stock';
+
+                        if ((int)$product->stock <= 0) {
+                            $stockClass = 'stock-out';
+                            $stockLabel = 'Out of Stock';
+                        } elseif ((int)$product->stock <= 5) {
+                            $stockClass = 'stock-low';
+                            $stockLabel = 'Low Stock';
+                        }
+
+                        $description = !empty($product->description) ? $product->description : 'Premium product available at NextGen Mobile Care.';
+                        if (strlen($description) > 110) {
+                            $description = substr($description, 0, 110) . '...';
+                        }
+                    ?>
+
+                    <div class="product-card">
+                        <div class="product-image-wrap">
+                            <span class="category-badge">
+                                <?php echo !empty($product->category) ? htmlspecialchars($product->category) : 'General'; ?>
+                            </span>
+
+                            <span class="stock-badge <?php echo $stockClass; ?>">
+                                <?php echo $stockLabel; ?>
+                            </span>
+
+                            <img
+                                src="<?php echo URLROOT; ?>/uploads/<?php echo htmlspecialchars($product->image); ?>"
+                                alt="<?php echo htmlspecialchars($product->name); ?>"
+                            >
+                        </div>
+
+                        <div class="product-content">
+                            <h3 class="product-name"><?php echo htmlspecialchars($product->name); ?></h3>
+
+                            <p class="product-desc"><?php echo htmlspecialchars($description); ?></p>
+
+                            <div class="product-meta">
+                                <div class="product-price">Rs. <?php echo number_format($product->price, 2); ?></div>
+                                <div class="product-stock-text">Stock: <?php echo (int)$product->stock; ?></div>
+                            </div>
+
+                            <div class="product-actions">
+                                <?php if ((int)$product->stock > 0) : ?>
+                                    <a href="<?php echo URLROOT; ?>/products/show/<?php echo $product->id; ?>" class="details-btn">View Details</a>
+                                <?php else : ?>
+                                    <span class="out-stock-btn">Currently Unavailable</span>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
         <?php else : ?>
-            <p>No products found.</p>
+            <div class="empty-products">
+                <h3 style="margin-bottom: 10px; color: #fff;">No products found</h3>
+                <p>Try changing the search text, category, or sort option.</p>
+            </div>
         <?php endif; ?>
     </div>
-</div>
+</section>
 
 <?php require APPROOT . '/views/partials/footer.php'; ?>

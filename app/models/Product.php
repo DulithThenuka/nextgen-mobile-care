@@ -36,7 +36,8 @@ class Product
 
     public function addProduct($name, $description, $price, $image, $category, $stock)
     {
-        $this->db->query("INSERT INTO products (name, description, price, image, category, stock) VALUES (:name, :description, :price, :image, :category, :stock)");
+        $this->db->query("INSERT INTO products (name, description, price, image, category, stock) 
+                          VALUES (:name, :description, :price, :image, :category, :stock)");
         $this->db->bind(':name', $name);
         $this->db->bind(':description', $description);
         $this->db->bind(':price', $price);
@@ -49,7 +50,9 @@ class Product
 
     public function updateProduct($id, $name, $description, $price, $image, $category, $stock)
     {
-        $this->db->query("UPDATE products SET name = :name, description = :description, price = :price, image = :image, category = :category, stock = :stock WHERE id = :id");
+        $this->db->query("UPDATE products 
+                          SET name = :name, description = :description, price = :price, image = :image, category = :category, stock = :stock 
+                          WHERE id = :id");
         $this->db->bind(':id', $id);
         $this->db->bind(':name', $name);
         $this->db->bind(':description', $description);
@@ -104,4 +107,38 @@ class Product
 
         return $this->db->resultSet();
     }
+
+    public function reduceStock($id, $quantity)
+    {
+        $this->db->query("UPDATE products SET stock = stock - :qty WHERE id = :id AND stock >= :qty");
+        $this->db->bind(':qty', $quantity);
+        $this->db->bind(':id', $id);
+
+        return $this->db->execute();
+    }
+    public function getLowStockProducts($limit = 5)
+{
+    $this->db->query("SELECT * FROM products WHERE stock > 0 AND stock <= :limitStock ORDER BY stock ASC LIMIT :limit");
+    $this->db->bind(':limitStock', 5, PDO::PARAM_INT);
+    $this->db->bind(':limit', (int)$limit, PDO::PARAM_INT);
+    return $this->db->resultSet();
+}
+
+public function getOutOfStockCount()
+{
+    $this->db->query("SELECT COUNT(*) as total FROM products WHERE stock = 0");
+    return $this->db->single()->total;
+}
+
+public function getLowStockCount()
+{
+    $this->db->query("SELECT COUNT(*) as total FROM products WHERE stock > 0 AND stock <= 5");
+    return $this->db->single()->total;
+}
+public function getProductsByCategory()
+{
+    $this->db->query("SELECT category, COUNT(*) as total FROM products GROUP BY category");
+    return $this->db->resultSet();
+}
+
 }
