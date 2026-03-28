@@ -330,7 +330,7 @@ $message_err = isset($data['message_err']) ? $data['message_err'] : '';
                     <div class="contact-actions">
                         <button type="submit" class="submit-btn">Send Message</button>
                         <a href="<?php echo URLROOT; ?>" class="secondary-btn">Back to Home</a>
-                        <a href="<?php echo URLROOT; ?>/booking" class="secondary-btn">Book Repair</a>
+                        <a href="<?php echo URLROOT; ?>/bookings" class="secondary-btn">Book Repair</a>
                     </div>
 
                     <p class="small-help">

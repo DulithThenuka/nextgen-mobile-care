@@ -462,7 +462,7 @@
         <nav class="nav-links">
             <a href="<?php echo URLROOT; ?>">Home</a>
             <a href="<?php echo URLROOT; ?>/products">Products</a>
-            <a href="<?php echo URLROOT; ?>/booking/create">Book Repair</a>
+            <a href="<?php echo URLROOT; ?>/bookings/create">Book Repair</a>
             <a href="<?php echo URLROOT; ?>/contact">Contact</a>
             <a href="<?php echo URLROOT; ?>/products" class="nav-btn">Shop Now</a>
         </nav>

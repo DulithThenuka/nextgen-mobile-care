@@ -23,8 +23,14 @@ class App {
         $this->controller = new $this->controller;
 
         if (isset($url[1]) && !empty($url[1])) {
-            if (method_exists($this->controller, $url[1])) {
-                $this->method = $url[1];
+            $requestedMethod = $url[1];
+            $camelMethod = lcfirst(str_replace(' ', '', ucwords(str_replace(['-', '_'], ' ', $requestedMethod))));
+
+            if (method_exists($this->controller, $requestedMethod)) {
+                $this->method = $requestedMethod;
+                unset($url[1]);
+            } elseif (method_exists($this->controller, $camelMethod)) {
+                $this->method = $camelMethod;
                 unset($url[1]);
             }
         }

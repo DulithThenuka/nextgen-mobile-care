@@ -257,107 +257,160 @@ foreach ($orders as $order) {
 ?>
 
 <div class="admin-orders-page">
-    <div class="container">
+<div class="container">
 
-        <div class="admin-orders-topbar">
-            <div>
-                <h1>Manage Order Requests</h1>
-                <p>Review customer product orders, approve requests, and monitor order status.</p>
-            </div>
+<div class="admin-orders-topbar">
+    <div>
+        <h1>Manage Order Requests</h1>
+        <p>Review customer product orders, approve requests, and monitor order status.</p>
+    </div>
 
-            <div class="summary-badges">
-                <span class="summary-badge">Total: <?php echo $totalOrders; ?></span>
-                <span class="summary-badge">Pending: <?php echo $pendingCount; ?></span>
-                <span class="summary-badge">Approved: <?php echo $approvedCount; ?></span>
-                <span class="summary-badge">Rejected: <?php echo $rejectedCount; ?></span>
-            </div>
-        </div>
+    <div class="summary-badges">
+        <span class="summary-badge">Total: <?php echo $totalOrders; ?></span>
+        <span class="summary-badge">Pending: <?php echo $pendingCount; ?></span>
+        <span class="summary-badge">Approved: <?php echo $approvedCount; ?></span>
+        <span class="summary-badge">Rejected: <?php echo $rejectedCount; ?></span>
+    </div>
+</div>
 
-        <div class="orders-card">
-            <?php if (!empty($orders)) : ?>
-                <div class="table-wrap">
-                    <table class="orders-table">
-                        <thead>
-                            <tr>
-                                <th>Customer</th>
-                                <th>Product</th>
-                                <th>Phone</th>
-                                <th>Address</th>
-                                <th>Quantity</th>
-                                <th>Status</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php foreach ($orders as $order) : ?>
-                                <?php
-                                    $status = strtolower(trim($order->status ?? 'pending'));
-                                    $statusClass = 'badge-pending';
+<div class="orders-card">
 
-                                    if (in_array($status, ['approved', 'confirmed'])) {
-                                        $statusClass = 'badge-approved';
-                                    } elseif ($status === 'completed') {
-                                        $statusClass = 'badge-completed';
-                                    } elseif (in_array($status, ['rejected', 'cancelled'])) {
-                                        $statusClass = 'badge-rejected';
-                                    }
+<?php if (!empty($orders)) : ?>
 
-                                    $address = !empty($order->address) ? $order->address : 'No address provided.';
-                                    if (strlen($address) > 95) {
-                                        $address = substr($address, 0, 95) . '...';
-                                    }
-                                ?>
-                                <tr>
-                                    <td>
-                                        <div class="customer-name"><?php echo htmlspecialchars($order->customer_name ?? $order->name ?? 'Unknown Customer'); ?></div>
-                                    </td>
+<div class="table-wrap">
+<table class="orders-table">
 
-                                    <td>
-                                        <div class="product-name"><?php echo htmlspecialchars($order->product_name ?? 'Unknown Product'); ?></div>
-                                        <?php if (!empty($order->product_id)) : ?>
-                                            <div class="sub-text">Product ID: <?php echo htmlspecialchars($order->product_id); ?></div>
-                                        <?php endif; ?>
-                                    </td>
+<thead>
+<tr>
+    <th>Customer</th>
+    <th>Product</th>
+    <th>Phone</th>
+    <th>Address</th>
+    <th>Quantity</th>
+    <th>Status</th>
+    <th>Actions</th>
+</tr>
+</thead>
 
-                                    <td>
-                                        <div class="sub-text"><?php echo htmlspecialchars($order->phone ?? 'No phone'); ?></div>
-                                    </td>
+<tbody>
 
-                                    <td>
-                                        <div class="address-box"><?php echo htmlspecialchars($address); ?></div>
-                                    </td>
+<?php foreach ($orders as $order) : ?>
 
-                                    <td>
-                                        <span class="qty-box"><?php echo (int)($order->quantity ?? 0); ?></span>
-                                    </td>
+<?php
+$status = strtolower(trim($order->status ?? 'pending'));
 
-                                    <td>
-                                        <span class="badge <?php echo $statusClass; ?>">
-                                            <?php echo htmlspecialchars(ucfirst($order->status ?? 'Pending')); ?>
-                                        </span>
-                                    </td>
+$statusClass = 'badge-pending';
 
-                                    <td>
-                                        <div class="action-group">
-                                            <a href="<?php echo URLROOT; ?>/admin/view_order/<?php echo $order->id; ?>" class="action-btn view-btn">View</a>
-                                            <a href="<?php echo URLROOT; ?>/admin/approve_order/<?php echo $order->id; ?>" class="action-btn approve-btn">Approve</a>
-                                            <a href="<?php echo URLROOT; ?>/admin/reject_order/<?php echo $order->id; ?>" class="action-btn reject-btn" onclick="return confirm('Are you sure you want to reject this order?');">Reject</a>
-                                        </div>
-                                    </td>
-                                </tr>
-                            <?php endforeach; ?>
-                        </tbody>
-                    </table>
-                </div>
-            <?php else : ?>
-                <div class="empty-state">
-                    <h3>No order requests found</h3>
-                    <p>Customer product order requests will appear here once they are submitted.</p>
-                </div>
-            <?php endif; ?>
-        </div>
+if (in_array($status, ['approved', 'confirmed'])) {
+    $statusClass = 'badge-approved';
+} elseif ($status === 'completed') {
+    $statusClass = 'badge-completed';
+} elseif (in_array($status, ['rejected', 'cancelled'])) {
+    $statusClass = 'badge-rejected';
+}
+
+/* Prevent duplicate actions */
+$isPending = ($status === 'pending');
+
+$address = !empty($order->address) ? $order->address : 'No address provided.';
+if (strlen($address) > 95) {
+    $address = substr($address, 0, 95) . '...';
+}
+?>
+
+<tr>
+
+<td>
+    <div class="customer-name">
+        <?php echo htmlspecialchars($order->customer_name ?? 'Unknown'); ?>
+    </div>
+</td>
+
+<td>
+    <div class="product-name">
+        <?php echo htmlspecialchars($order->product_name ?? 'Unknown Product'); ?>
+    </div>
+    <div class="sub-text">
+        ID: <?php echo htmlspecialchars($order->product_id ?? 'N/A'); ?>
+    </div>
+</td>
+
+<td>
+    <div class="sub-text">
+        <?php echo htmlspecialchars($order->phone ?? 'No phone'); ?>
+    </div>
+</td>
+
+<td>
+    <div class="address-box">
+        <?php echo htmlspecialchars($address); ?>
+    </div>
+</td>
+
+<td>
+    <span class="qty-box">
+        <?php echo (int)($order->quantity ?? 0); ?>
+    </span>
+</td>
+
+<td>
+    <span class="badge <?php echo $statusClass; ?>">
+        <?php echo ucfirst(htmlspecialchars($order->status ?? 'Pending')); ?>
+    </span>
+</td>
+
+<td>
+    <div class="action-group">
+
+        <a href="<?php echo URLROOT; ?>/admin/view_order/<?php echo $order->id; ?>" class="action-btn view-btn">
+            View
+        </a>
+
+        <?php if ($isPending): ?>
+
+            <a href="<?php echo URLROOT; ?>/admin/approve_order/<?php echo $order->id; ?>"
+               class="action-btn approve-btn"
+               onclick="return confirm('Approve this order?')">
+               Approve
+            </a>
+
+            <a href="<?php echo URLROOT; ?>/admin/reject_order/<?php echo $order->id; ?>"
+               class="action-btn reject-btn"
+               onclick="return confirm('Reject this order?')">
+               Reject
+            </a>
+
+        <?php else: ?>
+
+            <span class="action-btn" style="opacity:0.5;cursor:not-allowed;">
+                Completed
+            </span>
+
+        <?php endif; ?>
 
     </div>
+</td>
+
+</tr>
+
+<?php endforeach; ?>
+
+</tbody>
+</table>
+</div>
+
+<?php else : ?>
+
+<div class="empty-state">
+    <h3>No order requests found</h3>
+    <p>Customer product orders will appear here.</p>
+</div>
+
+<?php endif; ?>
+
+</div>
+
+</div>
 </div>
 
 <?php require APPROOT . '/views/partials/admin_footer.php'; ?>

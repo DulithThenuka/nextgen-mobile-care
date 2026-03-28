@@ -18,14 +18,26 @@ class Admin extends Controller{
         $this->contactModel = $this->model('Contact');
     }
 
+    private function requireAdmin()
+    {
+        if (!isset($_SESSION['admin_id'])) {
+            header('Location: ' . URLROOT . '/admin/login');
+            exit;
+        }
+    }
+
+    public function index()
+    {
+        $this->dashboard();
+    }
+
     public function login()
     {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $username = trim($_POST['username']);
             $password = trim($_POST['password']);
 
-            $adminModel = $this->model('AdminModel');
-            $admin = $adminModel->login($username, $password);
+            $admin = $this->adminModel->login($username, $password);
 
             if ($admin) {
                 $_SESSION['admin_id'] = $admin->id;
@@ -33,8 +45,7 @@ class Admin extends Controller{
                 header('Location: ' . URLROOT . '/admin/dashboard');
                 exit;
             } else {
-                $error = "Invalid username or password";
-                $this->view('admin/login', ['error' => $error]);
+                $this->view('admin/login', ['error' => "Invalid username or password"]);
             }
         } else {
             $this->view('admin/login');
@@ -42,111 +53,107 @@ class Admin extends Controller{
     }
 
     public function dashboard()
-{
-    if(!isset($_SESSION['admin_id'])) {
-        header('Location: ' . URLROOT . '/admin/login');
-        exit;
-    }
+    {
+        $this->requireAdmin();
 
-    $orderStatusData = $this->orderRequestModel->getOrderStatusCounts();
-    $productCategoryData = $this->productModel->getProductsByCategory();
-    $bookingStatusData = $this->bookingModel->getBookingStatusCounts();
+        $orderStatusData = $this->orderRequestModel->getOrderStatusCounts();
+        $productCategoryData = $this->productModel->getProductsByCategory();
+        $bookingStatusData = $this->bookingModel->getBookingStatusCounts();
 
-    $orderLabels = [];
-    $orderCounts = [];
+        $orderLabels = [];
+        $orderCounts = [];
 
-    foreach($orderStatusData as $row) {
-        $orderLabels[] = $row->status;
-        $orderCounts[] = $row->total;
-    }
-
-    $categoryLabels = [];
-    $categoryCounts = [];
-
-    foreach($productCategoryData as $row) {
-        $categoryLabels[] = $row->category;
-        $categoryCounts[] = $row->total;
-    }
-
-    $bookingLabels = [];
-    $bookingCounts = [];
-
-    foreach($bookingStatusData as $row) {
-        $bookingLabels[] = $row->status;
-        $bookingCounts[] = $row->total;
-    }
-
-    $monthlyBookingsData = $this->bookingModel->getMonthlyBookings();
-    $monthlyOrdersData = $this->orderRequestModel->getMonthlyOrders();
-    $monthlyMessagesData = $this->contactModel->getMonthlyMessages();
-
-    $months = [];
-    $bookingMonthlyMap = [];
-    $orderMonthlyMap = [];
-    $messageMonthlyMap = [];
-
-    foreach($monthlyBookingsData as $row) {
-        $months[] = $row->month_label;
-        $bookingMonthlyMap[$row->month_label] = $row->total;
-    }
-
-    foreach($monthlyOrdersData as $row) {
-        if(!in_array($row->month_label, $months)) {
-            $months[] = $row->month_label;
+        foreach($orderStatusData as $row) {
+            $orderLabels[] = $row->status;
+            $orderCounts[] = $row->total;
         }
-        $orderMonthlyMap[$row->month_label] = $row->total;
-    }
 
-    foreach($monthlyMessagesData as $row) {
-        if(!in_array($row->month_label, $months)) {
-            $months[] = $row->month_label;
+        $categoryLabels = [];
+        $categoryCounts = [];
+
+        foreach($productCategoryData as $row) {
+            $categoryLabels[] = $row->category;
+            $categoryCounts[] = $row->total;
         }
-        $messageMonthlyMap[$row->month_label] = $row->total;
+
+        $bookingLabels = [];
+        $bookingCounts = [];
+
+        foreach($bookingStatusData as $row) {
+            $bookingLabels[] = $row->status;
+            $bookingCounts[] = $row->total;
+        }
+
+        $monthlyBookingsData = $this->bookingModel->getMonthlyBookings();
+        $monthlyOrdersData = $this->orderRequestModel->getMonthlyOrders();
+        $monthlyMessagesData = $this->contactModel->getMonthlyMessages();
+
+        $months = [];
+        $bookingMonthlyMap = [];
+        $orderMonthlyMap = [];
+        $messageMonthlyMap = [];
+
+        foreach($monthlyBookingsData as $row) {
+            $months[] = $row->month_label;
+            $bookingMonthlyMap[$row->month_label] = $row->total;
+        }
+
+        foreach($monthlyOrdersData as $row) {
+            if(!in_array($row->month_label, $months)) {
+                $months[] = $row->month_label;
+            }
+            $orderMonthlyMap[$row->month_label] = $row->total;
+        }
+
+        foreach($monthlyMessagesData as $row) {
+            if(!in_array($row->month_label, $months)) {
+                $months[] = $row->month_label;
+            }
+            $messageMonthlyMap[$row->month_label] = $row->total;
+        }
+
+        sort($months);
+
+        $monthlyBookingCounts = [];
+        $monthlyOrderCounts = [];
+        $monthlyMessageCounts = [];
+
+        foreach($months as $month) {
+            $monthlyBookingCounts[] = $bookingMonthlyMap[$month] ?? 0;
+            $monthlyOrderCounts[] = $orderMonthlyMap[$month] ?? 0;
+            $monthlyMessageCounts[] = $messageMonthlyMap[$month] ?? 0;
+        }
+
+        $lowStockCount = $this->productModel->getLowStockCount();
+        $outOfStockCount = $this->productModel->getOutOfStockCount();
+
+        $data = [
+            'title' => 'Admin Dashboard',
+            'productCount' => $this->productModel->getProductCount(),
+            'bookingCount' => $this->bookingModel->getTotalBookings(),
+            'orderCount' => $this->orderRequestModel->getTotalOrders(),
+            'messageCount' => $this->contactModel->getTotalMessages(),
+            'lowStockCount' => $lowStockCount,
+            'outOfStockCount' => $outOfStockCount,
+            'totalStockAlerts' => $lowStockCount + $outOfStockCount,
+            'recentBookings' => $this->bookingModel->getRecentBookings(5),
+            'recentOrders' => $this->orderRequestModel->getRecentOrders(5),
+            'recentMessages' => $this->contactModel->getRecentMessages(5),
+            'lowStockProducts' => $this->productModel->getLowStockProducts(5),
+            'orderLabels' => $orderLabels,
+            'orderCounts' => $orderCounts,
+            'categoryLabels' => $categoryLabels,
+            'categoryCounts' => $categoryCounts,
+            'bookingLabels' => $bookingLabels,
+            'bookingCounts' => $bookingCounts,
+            'months' => $months,
+            'monthlyBookingCounts' => $monthlyBookingCounts,
+            'monthlyOrderCounts' => $monthlyOrderCounts,
+            'monthlyMessageCounts' => $monthlyMessageCounts
+        ];
+
+        $this->view('admin/dashboard', $data);
     }
-
-    sort($months);
-
-    $monthlyBookingCounts = [];
-    $monthlyOrderCounts = [];
-    $monthlyMessageCounts = [];
-
-    foreach($months as $month) {
-        $monthlyBookingCounts[] = isset($bookingMonthlyMap[$month]) ? $bookingMonthlyMap[$month] : 0;
-        $monthlyOrderCounts[] = isset($orderMonthlyMap[$month]) ? $orderMonthlyMap[$month] : 0;
-        $monthlyMessageCounts[] = isset($messageMonthlyMap[$month]) ? $messageMonthlyMap[$month] : 0;
-    }
-
-    $lowStockCount = $this->productModel->getLowStockCount();
-    $outOfStockCount = $this->productModel->getOutOfStockCount();
-    $totalStockAlerts = $lowStockCount + $outOfStockCount;
-
-    $data = [
-        'title' => 'Admin Dashboard',
-        'productCount' => $this->productModel->getProductCount(),
-        'bookingCount' => $this->bookingModel->getTotalBookings(),
-        'orderCount' => $this->orderRequestModel->getTotalOrders(),
-        'messageCount' => $this->contactModel->getTotalMessages(),
-        'lowStockCount' => $lowStockCount,
-        'outOfStockCount' => $outOfStockCount,
-        'totalStockAlerts' => $totalStockAlerts,
-        'recentBookings' => $this->bookingModel->getRecentBookings(5),
-        'recentOrders' => $this->orderRequestModel->getRecentOrders(5),
-        'recentMessages' => $this->contactModel->getRecentMessages(5),
-        'lowStockProducts' => $this->productModel->getLowStockProducts(5),
-        'orderLabels' => $orderLabels,
-        'orderCounts' => $orderCounts,
-        'categoryLabels' => $categoryLabels,
-        'categoryCounts' => $categoryCounts,
-        'bookingLabels' => $bookingLabels,
-        'bookingCounts' => $bookingCounts,
-        'months' => $months,
-        'monthlyBookingCounts' => $monthlyBookingCounts,
-        'monthlyOrderCounts' => $monthlyOrderCounts,
-        'monthlyMessageCounts' => $monthlyMessageCounts
-    ];
-
-    $this->view('admin/dashboard', $data);
-}
 
     public function logout()
     {
@@ -158,27 +165,16 @@ class Admin extends Controller{
 
     public function products()
     {
-        if (!isset($_SESSION['admin_id'])) {
-            header('Location: ' . URLROOT . '/admin/login');
-            exit;
-        }
+        $this->requireAdmin();
 
-        $productModel = $this->model('Product');
-        $products = $productModel->getProducts();
+        $products = $this->productModel->getProducts();
 
-        $data = [
-            'products' => $products
-        ];
-
-        $this->view('admin/products', $data);
+        $this->view('admin/products', ['products' => $products]);
     }
 
     public function addProduct()
     {
-        if (!isset($_SESSION['admin_id'])) {
-            header('Location: ' . URLROOT . '/admin/login');
-            exit;
-        }
+        $this->requireAdmin();
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $name = trim($_POST['name']);
@@ -189,30 +185,24 @@ class Admin extends Controller{
 
             $imageName = 'default.png';
 
-            if (isset($_FILES['image']) && $_FILES['image']['name'] != '') {
+            if (!empty($_FILES['image']['name'])) {
                 $imageName = time() . '_' . basename($_FILES['image']['name']);
                 $targetPath = dirname(APPROOT) . '/public/uploads/' . $imageName;
                 move_uploaded_file($_FILES['image']['tmp_name'], $targetPath);
             }
 
-            $productModel = $this->model('Product');
-            $productModel->addProduct($name, $description, $price, $imageName, $category, $stock);
+            $this->productModel->addProduct($name, $description, $price, $imageName, $category, $stock);
 
             header('Location: ' . URLROOT . '/admin/products');
             exit;
-        } else {
-            $this->view('admin/add_product');
         }
+
+        $this->view('admin/add_product');
     }
 
     public function editProduct($id)
     {
-        if (!isset($_SESSION['admin_id'])) {
-            header('Location: ' . URLROOT . '/admin/login');
-            exit;
-        }
-
-        $productModel = $this->model('Product');
+        $this->requireAdmin();
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $name = trim($_POST['name']);
@@ -221,7 +211,7 @@ class Admin extends Controller{
             $category = trim($_POST['category']);
             $stock = (int) trim($_POST['stock']);
 
-            if (isset($_FILES['image']) && $_FILES['image']['name'] != '') {
+            if (!empty($_FILES['image']['name'])) {
                 $imageName = time() . '_' . basename($_FILES['image']['name']);
                 $targetPath = dirname(APPROOT) . '/public/uploads/' . $imageName;
                 move_uploaded_file($_FILES['image']['tmp_name'], $targetPath);
@@ -229,111 +219,160 @@ class Admin extends Controller{
                 $imageName = $_POST['old_image'];
             }
 
-            $productModel->updateProduct($id, $name, $description, $price, $imageName, $category, $stock);
+            $this->productModel->updateProduct($id, $name, $description, $price, $imageName, $category, $stock);
 
             header('Location: ' . URLROOT . '/admin/products');
             exit;
-        } else {
-            $product = $productModel->getProductById($id);
-            $this->view('admin/product_form', ['product' => $product]);
         }
+
+        $product = $this->productModel->getProductById($id);
+        $this->view('admin/product_form', ['product' => $product]);
     }
 
     public function deleteProduct($id)
     {
-        if (!isset($_SESSION['admin_id'])) {
-            header('Location: ' . URLROOT . '/admin/login');
-            exit;
-        }
+        $this->requireAdmin();
 
-        $productModel = $this->model('Product');
-
-        if ($productModel->deleteProduct($id)) {
+        if ($this->productModel->deleteProduct($id)) {
             header('Location: ' . URLROOT . '/admin/products');
             exit;
-        } else {
-            die('Failed to delete product');
         }
+
+        die('Failed to delete product');
     }
 
     public function bookings()
     {
-        if (!isset($_SESSION['admin_id'])) {
-            header('Location: ' . URLROOT . '/admin/login');
-            exit;
-        }
+        $this->requireAdmin();
 
-        $bookingModel = $this->model('Booking');
-        $bookings = $bookingModel->getAllBookings();
-
+        $bookings = $this->bookingModel->getAllBookings();
         $this->view('admin/bookings', ['bookings' => $bookings]);
-    }
-
-
-    public function message()
-    {
-        return $this->messages();
     }
 
     public function messages()
     {
-        if (!isset($_SESSION['admin_id'])) {
-            header('Location: ' . URLROOT . '/admin/login');
-            exit;
-        }
+        $this->requireAdmin();
 
-        $contactModel = $this->model('Contact');
-        $messages = $contactModel->getAllMessages();
-
+        $messages = $this->contactModel->getAllMessages();
         $this->view('admin/messages', ['messages' => $messages]);
     }
 
     public function orders()
     {
-        if (!isset($_SESSION['admin_id'])) {
-            header('Location: ' . URLROOT . '/admin/login');
-            exit;
-        }
+        $this->requireAdmin();
 
-        $orderRequestModel = $this->model('OrderRequest');
-        $orders = $orderRequestModel->getAllOrderRequests();
-
+        $orders = $this->orderRequestModel->getAllOrderRequests();
         $this->view('admin/orders', ['orders' => $orders]);
     }
 
     public function updateOrderStatus($id, $status)
     {
-        if (!isset($_SESSION['admin_id'])) {
-            header('Location: ' . URLROOT . '/admin/login');
-            exit;
-        }
+        $this->requireAdmin();
 
-        $orderModel = $this->model('OrderRequest');
-        $productModel = $this->model('Product');
-
-        $order = $orderModel->getById($id);
+        $order = $this->orderRequestModel->getById($id);
 
         if (!$order) {
             die('Order not found');
         }
 
         if ($status === 'Approved') {
-            $product = $productModel->getProductById($order->product_id);
+            $product = $this->productModel->getProductById($order->product_id);
 
-            if (!$product) {
-                die('Product not found');
+            if (!$product || $order->quantity > $product->stock) {
+                die('Not enough stock');
             }
 
-            if ($order->quantity > $product->stock) {
-                die('Not enough stock to approve this order');
-            }
-
-            $productModel->reduceStock($order->product_id, $order->quantity);
+            $this->productModel->reduceStock($order->product_id, $order->quantity);
         }
 
-        $orderModel->updateStatus($id, $status);
+        $this->orderRequestModel->updateStatus($id, $status);
 
         header('Location: ' . URLROOT . '/admin/orders');
         exit;
     }
+
+    public function approve_order($id)
+    {
+        $this->updateOrderStatus($id, 'Approved');
+    }
+
+    public function reject_order($id)
+    {
+        $this->updateOrderStatus($id, 'Rejected');
+    }
+
+    public function view_order($id)
+    {
+        $this->requireAdmin();
+
+        $order = $this->orderRequestModel->getById($id);
+
+        if (!$order) {
+            die('Order not found');
+        }
+
+        $this->view('admin/order_view', ['order' => $order]);
+    }
+
+    public function delete_order($id)
+    {
+        $this->requireAdmin();
+
+        if ($this->orderRequestModel->deleteOrderRequest($id)) {
+            header('Location: ' . URLROOT . '/admin/orders');
+            exit;
+        }
+
+        die('Failed to delete order');
+    }
+
+    public function view_booking($id)
+    {
+        $this->requireAdmin();
+
+        $booking = $this->bookingModel->getBookingById($id);
+
+        if (!$booking) {
+            die('Booking not found');
+        }
+
+        $this->view('admin/booking_view', ['booking' => $booking]);
+    }
+
+    public function edit_booking($id)
+    {
+        $this->requireAdmin();
+
+        $booking = $this->bookingModel->getBookingById($id);
+
+        if (!$booking) {
+            die('Booking not found');
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $status = trim($_POST['status']);
+
+            if ($this->bookingModel->updateStatus($id, $status)) {
+                header('Location: ' . URLROOT . '/admin/bookings');
+                exit;
+            }
+
+            die('Failed to update booking');
+        }
+
+        $this->view('admin/booking_form', ['booking' => $booking]);
+    }
+
+    public function delete_booking($id)
+    {
+        $this->requireAdmin();
+
+        if ($this->bookingModel->deleteBooking($id)) {
+            header('Location: ' . URLROOT . '/admin/bookings');
+            exit;
+        }
+
+        die('Failed to delete booking');
+    }
+
 }

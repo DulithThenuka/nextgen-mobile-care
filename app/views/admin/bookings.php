@@ -242,124 +242,169 @@ $completedCount = 0;
 foreach ($bookings as $booking) {
     $statusValue = strtolower(trim($booking->status ?? 'pending'));
 
-    if ($statusValue === 'pending') {
-        $pendingCount++;
-    }
-
-    if ($statusValue === 'completed') {
-        $completedCount++;
-    }
+    if ($statusValue === 'pending') $pendingCount++;
+    if ($statusValue === 'completed') $completedCount++;
 }
 ?>
 
 <div class="admin-bookings-page">
-    <div class="container">
+<div class="container">
 
-        <div class="admin-bookings-topbar">
-            <div>
-                <h1>Manage Bookings</h1>
-                <p>Review customer repair bookings, service details, and booking status.</p>
-            </div>
+<div class="admin-bookings-topbar">
+    <div>
+        <h1>Manage Bookings</h1>
+        <p>Review repair bookings, update status, and manage service flow.</p>
+    </div>
 
-            <div class="summary-badges">
-                <span class="summary-badge">Total: <?php echo $totalBookings; ?></span>
-                <span class="summary-badge">Pending: <?php echo $pendingCount; ?></span>
-                <span class="summary-badge">Completed: <?php echo $completedCount; ?></span>
-            </div>
+    <div class="summary-badges">
+        <span class="summary-badge">Total: <?php echo $totalBookings; ?></span>
+        <span class="summary-badge">Pending: <?php echo $pendingCount; ?></span>
+        <span class="summary-badge">Completed: <?php echo $completedCount; ?></span>
+    </div>
+</div>
+
+<div class="bookings-card">
+
+<?php if (!empty($bookings)) : ?>
+
+<div class="table-wrap">
+<table class="bookings-table">
+
+<thead>
+<tr>
+    <th>Customer</th>
+    <th>Device</th>
+    <th>Service</th>
+    <th>Date</th>
+    <th>Issue</th>
+    <th>Status</th>
+    <th>Actions</th>
+</tr>
+</thead>
+
+<tbody>
+
+<?php foreach ($bookings as $booking) : ?>
+
+<?php
+$status = strtolower(trim($booking->status ?? 'pending'));
+
+$statusClass = 'badge-pending';
+
+if (in_array($status, ['confirmed','approved'])) {
+    $statusClass = 'badge-confirmed';
+} elseif ($status === 'completed') {
+    $statusClass = 'badge-completed';
+} elseif (in_array($status, ['cancelled','rejected'])) {
+    $statusClass = 'badge-cancelled';
+}
+
+/* Prevent editing after completed */
+$isEditable = ($status !== 'completed');
+
+$issue = !empty($booking->issue_description)
+    ? $booking->issue_description
+    : 'No issue description provided.';
+
+if (strlen($issue) > 100) {
+    $issue = substr($issue, 0, 100) . '...';
+}
+?>
+
+<tr>
+
+<td>
+    <div class="customer-name">
+        <?php echo htmlspecialchars($booking->customer_name ?? 'Unknown'); ?>
+    </div>
+    <div class="sub-text"><?php echo htmlspecialchars($booking->email ?? 'No email'); ?></div>
+    <div class="sub-text"><?php echo htmlspecialchars($booking->phone ?? 'No phone'); ?></div>
+</td>
+
+<td>
+    <div class="device-box">
+        <div class="customer-name" style="font-size:14px;">
+            <?php echo htmlspecialchars($booking->device_model ?? 'Unknown Device'); ?>
         </div>
+    </div>
+</td>
 
-        <div class="bookings-card">
-            <?php if (!empty($bookings)) : ?>
-                <div class="table-wrap">
-                    <table class="bookings-table">
-                        <thead>
-                            <tr>
-                                <th>Customer</th>
-                                <th>Device</th>
-                                <th>Service</th>
-                                <th>Booking Date</th>
-                                <th>Issue</th>
-                                <th>Status</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php foreach ($bookings as $booking) : ?>
-                                <?php
-                                    $status = strtolower(trim($booking->status ?? 'pending'));
-                                    $statusClass = 'badge-pending';
+<td>
+    <span class="badge badge-service">
+        <?php echo htmlspecialchars($booking->service_type ?? 'Service'); ?>
+    </span>
+</td>
 
-                                    if (in_array($status, ['confirmed', 'approved'])) {
-                                        $statusClass = 'badge-confirmed';
-                                    } elseif ($status === 'completed') {
-                                        $statusClass = 'badge-completed';
-                                    } elseif (in_array($status, ['cancelled', 'rejected'])) {
-                                        $statusClass = 'badge-cancelled';
-                                    }
+<td>
+    <span class="badge badge-date">
+        <?php echo htmlspecialchars($booking->booking_date ?? 'No Date'); ?>
+    </span>
+</td>
 
-                                    $issue = !empty($booking->issue_description) ? $booking->issue_description : 'No issue description provided.';
-                                    if (strlen($issue) > 110) {
-                                        $issue = substr($issue, 0, 110) . '...';
-                                    }
-                                ?>
-                                <tr>
-                                    <td>
-                                        <div class="customer-name"><?php echo htmlspecialchars($booking->customer_name ?? 'Unknown Customer'); ?></div>
-                                        <div class="sub-text"><?php echo htmlspecialchars($booking->email ?? 'No email'); ?></div>
-                                        <div class="sub-text"><?php echo htmlspecialchars($booking->phone ?? 'No phone'); ?></div>
-                                    </td>
+<td>
+    <div class="issue-box">
+        <?php echo htmlspecialchars($issue); ?>
+    </div>
+</td>
 
-                                    <td>
-                                        <div class="device-box">
-                                            <div class="customer-name" style="font-size: 14px;">
-                                                <?php echo htmlspecialchars($booking->device_model ?? 'Unknown Device'); ?>
-                                            </div>
-                                        </div>
-                                    </td>
+<td>
+    <span class="badge <?php echo $statusClass; ?>">
+        <?php echo ucfirst(htmlspecialchars($booking->status ?? 'Pending')); ?>
+    </span>
+</td>
 
-                                    <td>
-                                        <span class="badge badge-service">
-                                            <?php echo htmlspecialchars($booking->service_type ?? 'General Service'); ?>
-                                        </span>
-                                    </td>
+<td>
+    <div class="action-group">
 
-                                    <td>
-                                        <span class="badge badge-date">
-                                            <?php echo htmlspecialchars($booking->booking_date ?? 'No Date'); ?>
-                                        </span>
-                                    </td>
+        <a href="<?php echo URLROOT; ?>/admin/view_booking/<?php echo $booking->id; ?>"
+           class="action-btn view-btn">
+           View
+        </a>
 
-                                    <td>
-                                        <div class="issue-box"><?php echo htmlspecialchars($issue); ?></div>
-                                    </td>
+        <?php if ($isEditable): ?>
 
-                                    <td>
-                                        <span class="badge <?php echo $statusClass; ?>">
-                                            <?php echo htmlspecialchars(ucfirst($booking->status ?? 'Pending')); ?>
-                                        </span>
-                                    </td>
+            <a href="<?php echo URLROOT; ?>/admin/edit_booking/<?php echo $booking->id; ?>"
+               class="action-btn edit-btn">
+               Edit
+            </a>
 
-                                    <td>
-                                        <div class="action-group">
-                                            <a href="<?php echo URLROOT; ?>/admin/view_booking/<?php echo $booking->id; ?>" class="action-btn view-btn">View</a>
-                                            <a href="<?php echo URLROOT; ?>/admin/edit_booking/<?php echo $booking->id; ?>" class="action-btn edit-btn">Edit</a>
-                                            <a href="<?php echo URLROOT; ?>/admin/delete_booking/<?php echo $booking->id; ?>" class="action-btn delete-btn" onclick="return confirm('Are you sure you want to delete this booking?');">Delete</a>
-                                        </div>
-                                    </td>
-                                </tr>
-                            <?php endforeach; ?>
-                        </tbody>
-                    </table>
-                </div>
-            <?php else : ?>
-                <div class="empty-state">
-                    <h3>No bookings found</h3>
-                    <p>Customer repair bookings will appear here once they are submitted.</p>
-                </div>
-            <?php endif; ?>
-        </div>
+            <a href="<?php echo URLROOT; ?>/admin/delete_booking/<?php echo $booking->id; ?>"
+               class="action-btn delete-btn"
+               onclick="return confirm('Delete this booking?')">
+               Delete
+            </a>
+
+        <?php else: ?>
+
+            <span class="action-btn" style="opacity:0.5;cursor:not-allowed;">
+                Completed
+            </span>
+
+        <?php endif; ?>
 
     </div>
+</td>
+
+</tr>
+
+<?php endforeach; ?>
+
+</tbody>
+</table>
+</div>
+
+<?php else : ?>
+
+<div class="empty-state">
+    <h3>No bookings found</h3>
+    <p>Customer bookings will appear here.</p>
+</div>
+
+<?php endif; ?>
+
+</div>
+
+</div>
 </div>
 
 <?php require APPROOT . '/views/partials/admin_footer.php'; ?>

@@ -13,7 +13,7 @@
             </p>
 
             <div class="hero-actions">
-                <a href="<?php echo URLROOT; ?>/booking" class="btn btn-primary">Book a Repair</a>
+                <a href="<?php echo URLROOT; ?>/bookings" class="btn btn-primary">Book a Repair</a>
                 <a href="<?php echo URLROOT; ?>/products" class="btn btn-secondary">Browse Products</a>
             </div>
 
@@ -146,7 +146,7 @@
             </p>
 
             <div class="hero-actions" style="justify-content:center;">
-                <a href="<?php echo URLROOT; ?>/booking" class="btn btn-primary">Book Now</a>
+                <a href="<?php echo URLROOT; ?>/bookings" class="btn btn-primary">Book Now</a>
                 <a href="<?php echo URLROOT; ?>/products" class="btn btn-secondary">View Products</a>
             </div>
         </div>

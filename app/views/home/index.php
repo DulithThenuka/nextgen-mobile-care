@@ -435,7 +435,7 @@
                     </p>
 
                     <div class="hero-buttons">
-                        <a href="<?php echo URLROOT; ?>/booking/create" class="btn-premium">Book a Repair</a>
+                        <a href="<?php echo URLROOT; ?>/bookings/create" class="btn-premium">Book a Repair</a>
                         <a href="<?php echo URLROOT; ?>/products" class="btn-outline-light">Browse Products</a>
                     </div>
 
@@ -606,7 +606,7 @@
                     Book your service today or explore our latest products. We are here to help keep your devices
                     performing at their best with a cleaner and more professional experience.
                 </p>
-                <a href="<?php echo URLROOT; ?>/booking/create" class="btn-premium">Get Started</a>
+                <a href="<?php echo URLROOT; ?>/bookings/create" class="btn-premium">Get Started</a>
             </div>
         </div>
     </section>

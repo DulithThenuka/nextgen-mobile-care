@@ -5,7 +5,7 @@
         <div class="footer-links">
             <a href="<?php echo URLROOT; ?>">Home</a>
             <a href="<?php echo URLROOT; ?>/products">Products</a>
-            <a href="<?php echo URLROOT; ?>/booking">Book Repair</a>
+            <a href="<?php echo URLROOT; ?>/bookings">Book Repair</a>
             <a href="<?php echo URLROOT; ?>/contact">Contact</a>
         </div>
     </div>

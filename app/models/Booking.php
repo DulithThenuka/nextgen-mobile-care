@@ -47,42 +47,81 @@ class Booking
 
         return $this->db->execute();
     }
+
+    public function updateBooking($data)
+    {
+        $this->db->query('UPDATE bookings 
+                          SET customer_name = :customer_name, 
+                              email = :email, 
+                              phone = :phone, 
+                              device_model = :device_model, 
+                              issue_description = :issue_description, 
+                              service_type = :service_type, 
+                              booking_date = :booking_date, 
+                              status = :status
+                          WHERE id = :id');
+
+        $this->db->bind(':customer_name', $data['customer_name']);
+        $this->db->bind(':email', $data['email']);
+        $this->db->bind(':phone', $data['phone']);
+        $this->db->bind(':device_model', $data['device_model']);
+        $this->db->bind(':issue_description', $data['issue_description']);
+        $this->db->bind(':service_type', $data['service_type']);
+        $this->db->bind(':booking_date', $data['booking_date']);
+        $this->db->bind(':status', $data['status']);
+        $this->db->bind(':id', $data['id']);
+
+        return $this->db->execute();
+    }
+
+    public function deleteBooking($id)
+    {
+        $this->db->query('DELETE FROM bookings WHERE id = :id');
+        $this->db->bind(':id', $id);
+
+        return $this->db->execute();
+    }
+
     public function getBookingCount()
-{
-    $this->db->query("SELECT COUNT(*) as total FROM bookings");
-    $row = $this->db->single();
-    return $row->total;
-}
+    {
+        $this->db->query('SELECT COUNT(*) as total FROM bookings');
+        $row = $this->db->single();
+        return $row ? $row->total : 0;
+    }
 
-public function getTotalBookings() {
-    $this->db->query("SELECT COUNT(*) as total FROM bookings");
-    $row = $this->db->single();
-    return $row->total;
-}
+    public function getTotalBookings()
+    {
+        $this->db->query('SELECT COUNT(*) as total FROM bookings');
+        $row = $this->db->single();
+        return $row ? $row->total : 0;
+    }
 
-public function getRecentBookings($limit = 5) {
-    $this->db->query("SELECT * FROM bookings ORDER BY id DESC LIMIT $limit");
-    return $this->db->resultSet();
-}
-public function getBookingStatusCounts()
-{
-    $this->db->query("SELECT status, COUNT(*) as total FROM bookings GROUP BY status");
-    return $this->db->resultSet();
-}
+    public function getRecentBookings($limit = 5)
+    {
+        $limit = (int) $limit;
+        $this->db->query("SELECT * FROM bookings ORDER BY id DESC LIMIT $limit");
+        return $this->db->resultSet();
+    }
 
-public function getMonthlyBookings()
-{
-    $this->db->query("
-        SELECT 
-            YEAR(created_at) as year_num,
-            MONTH(created_at) as month_num,
-            DATE_FORMAT(MIN(created_at), '%b %Y') as month_label,
-            COUNT(*) as total
-        FROM bookings
-        WHERE created_at >= DATE_SUB(NOW(), INTERVAL 5 MONTH)
-        GROUP BY YEAR(created_at), MONTH(created_at)
-        ORDER BY YEAR(created_at), MONTH(created_at)
-    ");
-    return $this->db->resultSet();
-}
+    public function getBookingStatusCounts()
+    {
+        $this->db->query('SELECT status, COUNT(*) as total FROM bookings GROUP BY status');
+        return $this->db->resultSet();
+    }
+
+    public function getMonthlyBookings()
+    {
+        $this->db->query("
+            SELECT 
+                YEAR(created_at) as year_num,
+                MONTH(created_at) as month_num,
+                DATE_FORMAT(MIN(created_at), '%b %Y') as month_label,
+                COUNT(*) as total
+            FROM bookings
+            WHERE created_at >= DATE_SUB(NOW(), INTERVAL 5 MONTH)
+            GROUP BY YEAR(created_at), MONTH(created_at)
+            ORDER BY YEAR(created_at), MONTH(created_at)
+        ");
+        return $this->db->resultSet();
+    }
 }

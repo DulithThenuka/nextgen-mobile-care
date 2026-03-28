@@ -218,7 +218,7 @@ textarea.form-control {
             <h1>Book a Repair</h1>
             <p>Fill in the details below and submit your repair request.</p>
 
-            <form action="<?php echo URLROOT; ?>/booking/create" method="POST">
+            <form action="<?php echo URLROOT; ?>/bookings/create" method="POST">
                 <div class="form-grid">
                     <div class="form-group">
                         <label for="customer_name">Full Name</label>

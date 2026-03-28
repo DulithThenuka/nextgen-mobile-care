@@ -76,7 +76,7 @@ class Product
     {
         $this->db->query("SELECT COUNT(*) as total FROM products");
         $row = $this->db->single();
-        return $row->total;
+        return $row ? $row->total : 0;
     }
 
     public function searchAndFilterProducts($search = '', $sort = '', $category = '')
@@ -111,34 +111,36 @@ class Product
     public function reduceStock($id, $quantity)
     {
         $this->db->query("UPDATE products SET stock = stock - :qty WHERE id = :id AND stock >= :qty");
-        $this->db->bind(':qty', $quantity);
+        $this->db->bind(':qty', (int)$quantity);
         $this->db->bind(':id', $id);
 
         return $this->db->execute();
     }
+
     public function getLowStockProducts($limit = 5)
-{
-    $this->db->query("SELECT * FROM products WHERE stock > 0 AND stock <= :limitStock ORDER BY stock ASC LIMIT :limit");
-    $this->db->bind(':limitStock', 5, PDO::PARAM_INT);
-    $this->db->bind(':limit', (int)$limit, PDO::PARAM_INT);
-    return $this->db->resultSet();
-}
+    {
+        $limit = (int) $limit;
+        $this->db->query("SELECT * FROM products WHERE stock > 0 AND stock <= 5 ORDER BY stock ASC, id DESC LIMIT $limit");
+        return $this->db->resultSet();
+    }
 
-public function getOutOfStockCount()
-{
-    $this->db->query("SELECT COUNT(*) as total FROM products WHERE stock = 0");
-    return $this->db->single()->total;
-}
+    public function getOutOfStockCount()
+    {
+        $this->db->query("SELECT COUNT(*) as total FROM products WHERE stock = 0");
+        $row = $this->db->single();
+        return $row ? $row->total : 0;
+    }
 
-public function getLowStockCount()
-{
-    $this->db->query("SELECT COUNT(*) as total FROM products WHERE stock > 0 AND stock <= 5");
-    return $this->db->single()->total;
-}
-public function getProductsByCategory()
-{
-    $this->db->query("SELECT category, COUNT(*) as total FROM products GROUP BY category");
-    return $this->db->resultSet();
-}
+    public function getLowStockCount()
+    {
+        $this->db->query("SELECT COUNT(*) as total FROM products WHERE stock > 0 AND stock <= 5");
+        $row = $this->db->single();
+        return $row ? $row->total : 0;
+    }
 
+    public function getProductsByCategory()
+    {
+        $this->db->query("SELECT category, COUNT(*) as total FROM products GROUP BY category ORDER BY total DESC, category ASC");
+        return $this->db->resultSet();
+    }
 }

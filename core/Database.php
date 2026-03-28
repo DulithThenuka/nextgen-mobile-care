@@ -9,12 +9,14 @@ class Database
 
     private $dbh;
     private $stmt;
+    private $error;
 
     public function __construct()
     {
         $dsn = 'mysql:host=' . $this->host . ';dbname=' . $this->dbname . ';charset=utf8mb4';
 
         $options = [
+            PDO::ATTR_PERSISTENT => false,
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
             PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_OBJ
         ];
@@ -22,7 +24,8 @@ class Database
         try {
             $this->dbh = new PDO($dsn, $this->user, $this->pass, $options);
         } catch (PDOException $e) {
-            die('Database Connection Failed: ' . $e->getMessage());
+            $this->error = $e->getMessage();
+            die('Database Connection Failed: ' . $this->error);
         }
     }
 
@@ -73,5 +76,30 @@ class Database
     public function rowCount()
     {
         return $this->stmt->rowCount();
+    }
+
+    public function lastInsertId()
+    {
+        return $this->dbh->lastInsertId();
+    }
+
+    public function beginTransaction()
+    {
+        return $this->dbh->beginTransaction();
+    }
+
+    public function endTransaction()
+    {
+        return $this->dbh->commit();
+    }
+
+    public function cancelTransaction()
+    {
+        return $this->dbh->rollBack();
+    }
+
+    public function debugDumpParams()
+    {
+        return $this->stmt->debugDumpParams();
     }
 }

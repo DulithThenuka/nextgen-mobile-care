@@ -1,10 +1,27 @@
 <?php
 
-class Booking extends Controller
+class Bookings extends Controller
 {
     public function index()
     {
-        $this->view('booking/form');
+        $data = [
+            'customer_name' => '',
+            'email' => '',
+            'phone' => '',
+            'device_model' => '',
+            'issue_description' => '',
+            'service_type' => '',
+            'booking_date' => '',
+            'customer_name_err' => '',
+            'email_err' => '',
+            'phone_err' => '',
+            'device_model_err' => '',
+            'issue_description_err' => '',
+            'service_type_err' => '',
+            'booking_date_err' => ''
+        ];
+
+        $this->view('booking/form', $data);
     }
 
     public function create()
@@ -70,7 +87,7 @@ class Booking extends Controller
                 $bookingModel = $this->model('Booking');
 
                 if ($bookingModel->createBooking($data)) {
-                    header('Location: ' . URLROOT . '/booking/success');
+                    header('Location: ' . URLROOT . '/bookings/success');
                     exit;
                 } else {
                     die('Something went wrong');
@@ -125,13 +142,13 @@ class Booking extends Controller
             $bookingModel = $this->model('Booking');
 
             if ($bookingModel->updateStatus($id, $status)) {
-                header('Location: ' . URLROOT . '/booking/admin');
+                header('Location: ' . URLROOT . '/bookings/admin');
                 exit;
             } else {
                 die('Failed to update booking status');
             }
         } else {
-            header('Location: ' . URLROOT . '/booking/admin');
+            header('Location: ' . URLROOT . '/bookings/admin');
             exit;
         }
     }
