@@ -269,6 +269,12 @@ class Admin extends Controller{
         $this->view('admin/bookings', ['bookings' => $bookings]);
     }
 
+
+    public function message()
+    {
+        return $this->messages();
+    }
+
     public function messages()
     {
         if (!isset($_SESSION['admin_id'])) {

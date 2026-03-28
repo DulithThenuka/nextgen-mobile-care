@@ -1,4 +1,4 @@
-<?php require APPROOT . '/views/partials/header.php'; ?>
+<?php require APPROOT . '/views/partials/admin_header.php'; ?>
 
 <style>
 .admin-products-page {
@@ -335,4 +335,4 @@
     </div>
 </div>
 
-<?php require APPROOT . '/views/partials/footer.php'; ?>
+<?php require APPROOT . '/views/partials/admin_footer.php'; ?>

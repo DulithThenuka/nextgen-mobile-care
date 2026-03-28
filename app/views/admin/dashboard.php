@@ -1,178 +1,94 @@
-<?php require APPROOT . '/views/partials/header.php'; ?>
+<?php require APPROOT . '/views/partials/admin_header.php'; ?>
 
 <style>
-.admin-dashboard {
-    padding: 40px 0;
-    background:
-        radial-gradient(circle at top left, rgba(59,130,246,0.12), transparent 25%),
-        radial-gradient(circle at bottom right, rgba(6,182,212,0.10), transparent 25%),
-        #0b0f19;
-    min-height: 100vh;
-}
-
-/* TITLE */
-.dashboard-header {
-    margin-bottom: 30px;
-}
-
-.dashboard-header h1 {
-    font-size: 2rem;
-    margin-bottom: 8px;
-}
-
-.dashboard-header p {
-    color: #9fb0c7;
-}
-
-/* GRID */
-.stats-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 20px;
-}
-
-/* CARD */
-.stat-card {
-    background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.03));
-    border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 18px;
-    padding: 25px;
-    transition: 0.3s ease;
-    position: relative;
-}
-
-.stat-card:hover {
-    transform: translateY(-5px);
-    border-color: rgba(77,163,255,0.3);
-    box-shadow: 0 15px 30px rgba(0,0,0,0.35);
-}
-
-/* ICON */
-.stat-icon {
-    font-size: 28px;
-    margin-bottom: 12px;
-}
-
-/* TITLE */
-.stat-card h3 {
-    font-size: 15px;
-    color: #9fb0c7;
-    margin-bottom: 10px;
-}
-
-/* VALUE */
-.stat-value {
-    font-size: 26px;
-    font-weight: 800;
-}
-
-/* COLORS */
-.blue { color: #3b82f6; }
-.green { color: #10b981; }
-.orange { color: #f59e0b; }
-.red { color: #ef4444; }
-
-/* ACTIONS */
-.quick-actions {
-    margin-top: 40px;
-}
-
-.quick-actions h2 {
-    margin-bottom: 15px;
-}
-
-.actions-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 15px;
-}
-
-.action-btn {
-    display: block;
-    padding: 16px;
-    text-align: center;
-    border-radius: 12px;
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.08);
-    color: #fff;
-    text-decoration: none;
-    font-weight: 600;
-    transition: 0.3s;
-}
-
-.action-btn:hover {
-    background: rgba(59,130,246,0.15);
-    border-color: #3b82f6;
-    transform: translateY(-3px);
-}
-
-/* RESPONSIVE */
-@media(max-width: 900px){
-    .stats-grid,
-    .actions-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-}
-
-@media(max-width: 500px){
-    .stats-grid,
-    .actions-grid {
-        grid-template-columns: 1fr;
-    }
-}
+.dashboard-hero{display:flex;justify-content:space-between;align-items:flex-start;gap:18px;flex-wrap:wrap;margin-bottom:28px;}
+.dashboard-hero-text h2{font-size:32px;margin-bottom:10px;}
+.dashboard-hero-text p{max-width:720px;color:#94a3b8;}
+.quick-links{display:flex;gap:12px;flex-wrap:wrap;}
+.stats-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px;margin-bottom:28px;}
+.stat-card{padding:22px;border-radius:22px;background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.03));border:1px solid rgba(255,255,255,.08);}
+.stat-label{color:#94a3b8;font-size:14px;margin-bottom:10px;}
+.stat-value{font-size:34px;font-weight:800;color:#fff;}
+.panels-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:18px;}
+.panel{padding:22px;border-radius:22px;background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.03));border:1px solid rgba(255,255,255,.08);}
+.panel h3{margin-bottom:16px;font-size:20px;}
+.activity-list{display:grid;gap:12px;}
+.activity-item{padding:14px 16px;border-radius:16px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);}
+.activity-item strong{display:block;color:#fff;margin-bottom:4px;}
+.activity-item span{color:#94a3b8;font-size:14px;}
+.stock-list{display:grid;gap:12px;}
+.stock-item{display:flex;justify-content:space-between;gap:12px;padding:14px 16px;border-radius:16px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);}
+.stock-item small{color:#94a3b8;display:block;}
+.empty-state{color:#94a3b8;padding:16px 0;}
+@media (max-width: 1100px){.stats-grid{grid-template-columns:repeat(2,minmax(0,1fr));}.panels-grid{grid-template-columns:1fr;}}
+@media (max-width: 640px){.stats-grid{grid-template-columns:1fr;}}
 </style>
 
-<div class="admin-dashboard">
-    <div class="container">
-
-        <!-- HEADER -->
-        <div class="dashboard-header">
-            <h1>Admin Dashboard</h1>
-            <p>Manage your system, monitor activity, and control your platform.</p>
-        </div>
-
-        <!-- STATS -->
-        <div class="stats-grid">
-
-            <div class="stat-card">
-                <div class="stat-icon blue">📅</div>
-                <h3>Total Bookings</h3>
-                <div class="stat-value"><?php echo $data['bookings_count'] ?? 0; ?></div>
-            </div>
-
-            <div class="stat-card">
-                <div class="stat-icon green">🛒</div>
-                <h3>Order Requests</h3>
-                <div class="stat-value"><?php echo $data['orders_count'] ?? 0; ?></div>
-            </div>
-
-            <div class="stat-card">
-                <div class="stat-icon orange">📦</div>
-                <h3>Total Products</h3>
-                <div class="stat-value"><?php echo $data['products_count'] ?? 0; ?></div>
-            </div>
-
-            <div class="stat-card">
-                <div class="stat-icon red">✉️</div>
-                <h3>Messages</h3>
-                <div class="stat-value"><?php echo $data['messages_count'] ?? 0; ?></div>
-            </div>
-
-        </div>
-
-        <!-- QUICK ACTIONS -->
-        <div class="quick-actions">
-            <h2>Quick Actions</h2>
-
-            <div class="actions-grid">
-                <a href="<?php echo URLROOT; ?>/admin/products" class="action-btn">Manage Products</a>
-                <a href="<?php echo URLROOT; ?>/admin/bookings" class="action-btn">View Bookings</a>
-                <a href="<?php echo URLROOT; ?>/admin/orders" class="action-btn">Order Requests</a>
-                <a href="<?php echo URLROOT; ?>/admin/message" class="action-btn">Contact Messages</a>
-            </div>
-        </div>
-
+<div class="dashboard-hero">
+    <div class="dashboard-hero-text">
+        <h2>Welcome to your admin dashboard</h2>
+        <p>Manage products, track bookings, review orders, and check customer messages from one place without making the panel feel heavy or confusing.</p>
+    </div>
+    <div class="quick-links">
+        <a href="<?php echo URLROOT; ?>/admin/addProduct" class="btn-primary">Add Product</a>
+        <a href="<?php echo URLROOT; ?>/admin/orders" class="btn-secondary">View Orders</a>
     </div>
 </div>
 
-<?php require APPROOT . '/views/partials/footer.php'; ?>
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-label">Total Products</div>
+        <div class="stat-value"><?php echo $data['productCount'] ?? 0; ?></div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Repair Bookings</div>
+        <div class="stat-value"><?php echo $data['bookingCount'] ?? 0; ?></div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Order Requests</div>
+        <div class="stat-value"><?php echo $data['orderCount'] ?? 0; ?></div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Customer Messages</div>
+        <div class="stat-value"><?php echo $data['messageCount'] ?? 0; ?></div>
+    </div>
+</div>
+
+<div class="panels-grid">
+    <div class="panel">
+        <h3>Recent bookings</h3>
+        <?php if(!empty($data['recentBookings'])): ?>
+            <div class="activity-list">
+                <?php foreach($data['recentBookings'] as $booking): ?>
+                    <div class="activity-item">
+                        <strong><?php echo htmlspecialchars($booking->customer_name ?? 'Customer'); ?></strong>
+                        <span><?php echo htmlspecialchars($booking->device_model ?? 'Device'); ?> • <?php echo htmlspecialchars($booking->status ?? 'Pending'); ?></span>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        <?php else: ?>
+            <div class="empty-state">No recent bookings found.</div>
+        <?php endif; ?>
+    </div>
+
+    <div class="panel">
+        <h3>Stock alerts</h3>
+        <?php if(!empty($data['lowStockProducts'])): ?>
+            <div class="stock-list">
+                <?php foreach($data['lowStockProducts'] as $product): ?>
+                    <div class="stock-item">
+                        <div>
+                            <strong><?php echo htmlspecialchars($product->name ?? 'Product'); ?></strong>
+                            <small><?php echo htmlspecialchars($product->category ?? 'Category'); ?></small>
+                        </div>
+                        <strong><?php echo (int)($product->stock ?? 0); ?></strong>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        <?php else: ?>
+            <div class="empty-state">No low stock products right now.</div>
+        <?php endif; ?>
+    </div>
+</div>
+
+<?php require APPROOT . '/views/partials/admin_footer.php'; ?>
